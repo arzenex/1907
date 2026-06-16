@@ -1,0 +1,561 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>A Special Moment Awaits</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+    <!-- Canvas Confetti Library -->
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.2/dist/confetti.browser.min.js"></script>
+    <style>
+        body {
+            background: radial-gradient(circle at center, #1b2735 0%, #090a0f 100%);
+            color: #ffffff;
+            font-family: 'Poppins', sans-serif;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            overflow: hidden;
+            perspective: 1000px;
+            user-select: none;
+            -webkit-user-select: none;
+            touch-action: manipulation;
+            -moz-user-select: none;
+            -ms-user-select: none;
+        }
+
+        .shake {
+            animation: screenShake 0.4s cubic-bezier(.36,.07,.19,.97) both;
+        }
+
+        @keyframes screenShake {
+            10%, 90% { transform: translate3d(-2px, -2px, 0); }
+            20%, 80% { transform: translate3d(4px, 4px, 0); }
+            30%, 50%, 70% { transform: translate3d(-6px, -6px, 0); }
+            40%, 60% { transform: translate3d(6px, 6px, 0); }
+        }
+
+        #flash-overlay {
+            position: fixed;
+            inset: 0;
+            background: white;
+            opacity: 0;
+            z-index: 10000;
+            pointer-events: none;
+        }
+
+        .flash-active { animation: flashAnim 0.15s ease-out; }
+        @keyframes flashAnim { 0% { opacity: 0.5; } 100% { opacity: 0; } }
+
+        .container {
+            text-align: center;
+            z-index: 20;
+            padding: 80px 50px;
+            max-width: 90%;
+            animation: contentFadeIn 2s ease-out;
+        }
+
+        .warning {
+            font-family: 'Cinzel', serif;
+            font-size: 3.5rem;
+            font-weight: 900;
+            margin-bottom: 20px;
+            letter-spacing: 4px;
+            text-transform: uppercase;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 20px;
+            position: relative;
+            min-height: 200px;
+            width: 100%;
+        }
+
+        .letter {
+            background: linear-gradient(to bottom, #cf995f 22%, #f1de83 45%, #bb8d3c 50%, #d6ae7b 63%, #ad7f35 84%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            display: inline-block;
+            opacity: 0;
+            font-size: 4rem;
+            font-weight: 900;
+            animation-delay: var(--delay);
+            filter: drop-shadow(0 0 10px rgba(214, 158, 46, 0.4));
+            animation: explodeFromCake 1.2s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+            will-change: transform, opacity;
+        }
+
+        .letter-wrapper {
+            display: inline-block;
+            animation: letterFly 4s ease-in-out infinite alternate;
+            animation-delay: calc(var(--delay) + 1.2s);
+        }
+
+        @keyframes letterFly {
+            0% { transform: translate(0, 0) rotate(0deg); }
+            100% { transform: translate(8px, -12px) rotate(4deg); }
+        }
+
+        @keyframes explodeFromCake {
+            0% {
+                opacity: 0;
+                transform: scale(0) translate(var(--origin-x), var(--origin-y)) rotate(720deg);
+            }
+            50% {
+                opacity: 1;
+            }
+            100% {
+                opacity: 1;
+                transform: scale(1) translate(0, 0) rotate(0deg);
+            }
+        }
+
+        .sub-text {
+            font-size: 1rem;
+            color: #e0e0e0;
+            margin-top: 10px;
+            letter-spacing: 1px;
+            font-weight: 300;
+        }
+
+        @keyframes cakePulse {
+            0%, 100% { transform: translate3d(-50%, -50%, 0) scale(1); }
+            50% { transform: translate3d(-50%, -50%, 0) scale(1.2); }
+        }
+
+        @keyframes cakeFadeOut {
+            to { opacity: 0; transform: translate(-50%, -50%) scale(0); visibility: hidden; }
+        }
+
+        #central-cake {
+            font-size: 6rem;
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 5;
+            animation: cakePulse 1.5s ease-in-out infinite, cakeFadeOut 0.5s forwards;
+            will-change: transform;
+            animation-delay: 0s, 3.8s;
+        }
+
+        /* Decoration Elements */
+        .confetti {
+            position: absolute;
+            width: 10px;
+            height: 25px;
+            background: #ffd700;
+            top: -50px;
+            opacity: 0.7;
+            animation: fall var(--d) linear infinite;
+        }
+
+        @keyframes fall {
+            to { transform: translateY(110vh) rotate(720deg); }
+        }
+
+        .sparkle {
+            position: absolute;
+            background: white;
+            border-radius: 50%;
+            opacity: 0;
+            animation: sparkleAnim 3s infinite;
+        }
+
+        @keyframes sparkleAnim {
+            0%, 100% { opacity: 0; transform: scale(0); }
+            50% { opacity: 0.8; transform: scale(1); }
+        }
+
+        .balloon-wrapper {
+            position: absolute;
+            bottom: -100px;
+            animation: floatUp var(--d) ease-in infinite;
+            animation-delay: var(--delay);
+            z-index: 5;
+            will-change: transform;
+        }
+
+        .balloon-content {
+            font-size: var(--sz);
+            animation: sway var(--sw) ease-in-out infinite alternate;
+            filter: hue-rotate(var(--hue)) drop-shadow(0 0 10px rgba(255,255,255,0.2));
+            opacity: var(--op);
+            user-select: none;
+            display: inline-block;
+            will-change: transform;
+            -webkit-touch-callout: none;
+            pointer-events: auto;
+            cursor: pointer;
+        }
+
+        .tap-effect {
+            position: absolute;
+            pointer-events: none;
+            animation: tapPop 0.6s ease-out forwards;
+            font-size: 24px;
+            z-index: 9999;
+        }
+
+        @keyframes tapPop {
+            0% { transform: scale(0) translateY(0); opacity: 1; }
+            100% { transform: scale(2) translateY(-50px); opacity: 0; }
+        }
+
+        @keyframes floatUp {
+            0% { transform: translate3d(0, 0, 0) scale(0); opacity: 0; }
+            10% { transform: translate3d(0, -10vh, 0) scale(1); opacity: 1; }
+            90% { opacity: 1; }
+            100% { transform: translate3d(0, -170vh, 0) scale(1); opacity: 0; }
+        }
+
+        .pop-blast { animation: popBlast 0.4s ease-out forwards !important; }
+
+        @keyframes popBlast {
+            0% { transform: scale(1); filter: brightness(1) hue-rotate(var(--hue)); }
+            10% { transform: scale(3) rotate(20deg); filter: brightness(10) hue-rotate(var(--hue)); opacity: 1; }
+            100% { transform: scale(6); opacity: 0; filter: brightness(1) hue-rotate(var(--hue)) blur(10px); }
+        }
+
+        @keyframes sway {
+            0% { margin-left: calc(-1 * var(--sw-dist)); transform: rotate(-15deg) rotateY(-25deg) translateZ(50px); }
+            100% { margin-left: var(--sw-dist); transform: rotate(15deg) rotateY(25deg) translateZ(-50px); }
+        }
+
+        @keyframes contentFadeIn {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .petal-fall {
+            animation: petalFall 6s cubic-bezier(.37,.01,.63,1) forwards !important;
+        }
+
+        @keyframes petalFall {
+            to { transform: translate(var(--tx), 100vh) rotate(var(--tr)); opacity: 0; }
+        }
+
+        @keyframes float {
+            0% { transform: translate(0, 0); }
+            33% { transform: translate(100px, 50px); }
+            66% { transform: translate(-50px, 150px); }
+            100% { transform: translate(0, 0); }
+        }
+
+        #action-area {
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 80px;
+        }
+
+        #decoration-layer {
+            position: fixed;
+            inset: 0;
+            pointer-events: none; /* Allows clicks to pass through to the container */
+            z-index: 10;
+        }
+
+        .surprise-btn {
+            display: block;
+            margin: 20px auto;
+            padding: 15px 40px;
+            font-family: 'Cinzel', serif;
+            font-size: 1.2rem;
+            font-weight: 700;
+            background: linear-gradient(to bottom, #cf995f, #ad7f35);
+            color: white;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            box-shadow: 0 0 20px rgba(214, 158, 46, 0.4);
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            opacity: 0;
+            animation: contentFadeIn 1s forwards;
+            animation-delay: 5.5s;
+        }
+        .surprise-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 30px rgba(214, 158, 46, 0.7);
+        }
+    </style>
+</head>
+<body>
+    <div id="flash-overlay"></div>
+    <div id="decoration-layer"></div>
+    <div class="floating-orb" style="width: 500px; height: 500px; top: -200px; left: -200px; background: radial-gradient(circle, rgba(214, 158, 46, 0.1) 0%, transparent 70%);"></div>
+    <div class="floating-orb" style="width: 600px; height: 600px; bottom: -300px; right: -300px; background: radial-gradient(circle, rgba(138, 43, 226, 0.1) 0%, transparent 70%); animation-duration: 25s;"></div>
+
+    <div class="container">
+        <div class="warning" id="status-title">BE PATIENCE ✨</div>
+        <div id="main-msg" class="sub-text"></div>
+        <div id="hint-msg" class="sub-text"></div>
+        <div id="action-area"></div>
+    </div>
+
+    <script>
+        let audioCtx;
+        function playPopEffect(x, y) {
+            if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            if (audioCtx.state === 'suspended') audioCtx.resume();
+
+            // Explosive Noise Buffer (Bomb Effect)
+            const bufferSize = audioCtx.sampleRate * 0.3;
+            const buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
+            const data = buffer.getChannelData(0);
+            for (let i = 0; i < bufferSize; i++) data[i] = Math.random() * 2 - 1;
+
+            const noise = audioCtx.createBufferSource();
+            noise.buffer = buffer;
+
+            const filter = audioCtx.createBiquadFilter();
+            filter.type = 'lowpass';
+            filter.frequency.setValueAtTime(1200, audioCtx.currentTime);
+            filter.frequency.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.3);
+
+            const gain = audioCtx.createGain();
+            gain.gain.setValueAtTime(0.4, audioCtx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.3);
+
+            noise.connect(filter);
+            filter.connect(gain);
+            gain.connect(audioCtx.destination);
+            noise.start();
+            noise.stop(audioCtx.currentTime + 0.3);
+
+            // Trigger Screen Shake
+            document.body.classList.remove('shake');
+            void document.body.offsetWidth; // Force reflow
+            document.body.classList.add('shake');
+
+            // Trigger Screen Flash for "Brutal" Bomb Feel
+            const flash = document.getElementById('flash-overlay');
+            flash.classList.remove('flash-active');
+            void flash.offsetWidth;
+            flash.classList.add('flash-active');
+
+            // Fire Confetti at the pop location
+            if (typeof confetti === 'function' && x !== undefined && y !== undefined) {
+                confetti({
+                    particleCount: 40,
+                    spread: 70,
+                    origin: { x: x / window.innerWidth, y: y / window.innerHeight },
+                    colors: ['#cf995f', '#f1de83', '#bb8d3c', '#ffffff', '#ff69b4'],
+                    ticks: 200
+                });
+            }
+        }
+
+        const now = new Date();
+        const isBirthday = (now.getMonth() === 5 && now.getDate() === 16);
+        console.log("Date Check - Month:", now.getMonth(), "Day:", now.getDate(), "Match:", isBirthday);
+        
+        const warning = document.querySelector(".warning");
+        const mainMsg = document.getElementById("main-msg");
+        const hintMsg = document.getElementById("hint-msg");
+        const actionArea = document.getElementById("action-area");
+        const decorationLayer = document.getElementById("decoration-layer");
+
+        let balloonCount = 0;
+
+        function decrementBalloons() {
+            balloonCount--;
+            if (balloonCount <= 0) {
+                const letters = document.querySelectorAll('.letter');
+                letters.forEach(l => {
+                    l.style.setProperty('--tx', (Math.random() * 600 - 300) + 'px');
+                    l.style.setProperty('--tr', (Math.random() * 1080 - 540) + 'deg');
+                    l.classList.add('petal-fall');
+                });
+
+                // Reveal the surprise button only after all balloons are gone
+                actionArea.innerHTML = `
+                    <button class="surprise-btn" onclick="window.location.href='video.html'" style="opacity: 1; animation: none;">
+                        SEE SURPRISE ✨
+                    </button>
+                `;
+            }
+        }
+
+        // Create high-effort decorations
+        function createDecorations() {
+            const balloons = ['🎈', '🎈', '🎈', '🎈', '🎈'];
+            const fragment = document.createDocumentFragment();
+            const totalBalloons = 30;
+            balloonCount = totalBalloons;
+
+            for(let i=0; i<totalBalloons; i++) {
+                const wrapper = document.createElement('div');
+                wrapper.className = 'balloon-wrapper';
+                wrapper.style.left = Math.random() * 90 + 'vw';
+
+                const inner = document.createElement('div');
+                inner.className = 'balloon-content';
+                inner.textContent = balloons[Math.floor(Math.random() * balloons.length)];
+
+                const duration = Math.random() * 6 + 7;
+                const delay = Math.random() * 15;
+
+                wrapper.style.setProperty('--d', duration + 's');
+                wrapper.style.setProperty('--delay', delay + 's');
+                inner.style.setProperty('--sw', (Math.random() * 2 + 2) + 's');
+                inner.style.setProperty('--sw-dist', (Math.random() * 40 + 20) + 'px');
+                inner.style.setProperty('--sz', (Math.random() * 3 + 4) + 'rem');
+                inner.style.setProperty('--op', (Math.random() * 0.3 + 0.5));
+                inner.style.setProperty('--hue', Math.random() * 360 + 'deg');
+                inner.style.pointerEvents = 'auto'; /* Re-enable for balloons specifically */
+                
+                // Manual Pop Interaction (Using pointerdown for better mobile support)
+                const handlePop = (e) => {
+                    if (!inner.classList.contains('pop-blast')) {
+                        inner.classList.add('pop-blast');
+                        const x = e.clientX || (e.touches ? e.touches[0].clientX : 0);
+                        const y = e.clientY || (e.touches ? e.touches[0].clientY : 0);
+                        playPopEffect(x, y);
+                        decrementBalloons();
+                    }
+                };
+
+                inner.addEventListener('pointerdown', handlePop);
+                
+                wrapper.appendChild(inner);
+                fragment.appendChild(wrapper);
+
+                // Re-enable automatic blasts near the top of the screen
+                setTimeout(() => {
+                    if (!inner.classList.contains('pop-blast')) {
+                        // Calculate approximate blast position
+                        const blastX = (parseFloat(wrapper.style.left) / 100) * window.innerWidth;
+                        const blastY = window.innerHeight * 0.1; // Blast at 10% from the top
+                        inner.classList.add('pop-blast');
+                        playPopEffect(blastX, blastY);
+                        decrementBalloons();
+                    }
+                }, (delay + duration * 0.85) * 1000);
+            }
+
+            const colors = ['#ffd700', '#ffffff', '#ff69b4', '#00ffff', '#adff2f'];
+            for(let i=0; i<50; i++) {
+                const c = document.createElement('div');
+                c.className = 'confetti';
+                c.style.left = Math.random() * 100 + 'vw';
+                c.style.background = colors[Math.floor(Math.random() * colors.length)];
+                c.style.setProperty('--d', (Math.random() * 3 + 2) + 's');
+                c.style.animationDelay = Math.random() * 5 + 's';
+                fragment.appendChild(c);
+            }
+            for(let i=0; i<40; i++) {
+                const s = document.createElement('div');
+                s.className = 'sparkle';
+                s.style.width = s.style.height = Math.random() * 3 + 'px';
+                s.style.left = Math.random() * 100 + 'vw';
+                s.style.top = Math.random() * 100 + 'vh';
+                s.style.animationDelay = Math.random() * 5 + 's';
+                fragment.appendChild(s);
+            }
+
+            decorationLayer.appendChild(fragment);
+        }
+
+        function animateBirthdayText(text) {
+            warning.innerHTML = '<div id="central-cake">🎂</div>';
+            
+            // Allow cake to pulse before letters explode
+            const words = text.split(' ');
+            
+            setTimeout(() => {
+                // Massive Confetti Release
+                confetti({
+                    particleCount: 200,
+                    spread: 120,
+                    origin: { y: 0.6 },
+                    colors: ['#ffd700', '#ffffff', '#cf995f', '#f1de83']
+                });
+
+                words.forEach((word, wIdx) => {
+                    const wordWrap = document.createElement('div');
+                    wordWrap.style.display = 'flex';
+                    wordWrap.style.justifyContent = 'center';
+                    
+                    for (let i = 0; i < word.length; i++) {
+                        const wrapper = document.createElement('span');
+                        wrapper.className = 'letter-wrapper';
+                        wrapper.style.setProperty('--delay', (0.5 + wIdx * 0.2 + i * 0.05) + 's');
+
+                        const span = document.createElement('span');
+                        span.textContent = word[i];
+                        span.className = 'letter';
+                        
+                        // Increased origin spread to make the "flying" from the cake more dramatic
+                        span.style.setProperty('--origin-x', (Math.random() * 400 - 200) + 'px');
+                        span.style.setProperty('--origin-y', (Math.random() * 400 - 200) + 'px');
+                        span.style.setProperty('--delay', (0.5 + wIdx * 0.2 + i * 0.05) + 's');
+                        
+                        wrapper.appendChild(span);
+                        wordWrap.appendChild(wrapper);
+                    }
+                    warning.appendChild(wordWrap);
+                });
+            }, 3500);
+        }
+
+        // Parse URL parameters to check if we are in "retry" mode
+        const urlParams = new URLSearchParams(window.location.search);
+        const isRetry = urlParams.get('retry') === 'true';
+
+        function startPrank() {
+            createDecorations();
+            animateBirthdayText("HAPPY BIRTHDAY");
+            if (isRetry) {
+                mainMsg.innerHTML = "ONE FINAL SECRET ✨";
+                hintMsg.innerHTML = "Tap the screen 30 times to reveal the true ending!";
+            }
+            actionArea.innerHTML = "<div class='sub-text' style='margin-top:20px; font-weight:600; color:#f1de83;'>Pop the balloons🎈</div>";
+        }
+
+        if (isBirthday) {
+            // Keep the "Tiny Note" visible for 4 seconds so they read it before the "explosion"
+            let tapCount = 0;
+
+            // Hidden redirect logic: 30 taps takes user to birthday.html
+            document.addEventListener('pointerdown', (e) => {
+                if (!isRetry) return;
+
+                tapCount++;
+                
+                // Visual Tap Feedback (Cake Emoji)
+                const effect = document.createElement('div');
+                effect.className = 'tap-effect';
+                effect.innerHTML = '🎂';
+                effect.style.left = e.clientX + 'px';
+                effect.style.top = e.clientY + 'px';
+                document.body.appendChild(effect);
+                setTimeout(() => effect.remove(), 600);
+
+                hintMsg.innerHTML = `Progress: ${tapCount} / 30 taps`;
+
+                if (tapCount >= 30) {
+                    window.location.href = "birthday.html";
+                }
+            });
+
+            // Use the logic to skip the wait if it's a retry
+            if (isRetry) {
+                startPrank();
+            } else {
+                setTimeout(startPrank, 4000);
+            }
+        } else {
+            // If it's not the special day, redirect immediately to the matrix terminal
+            window.location.href = "index.html";
+        }
+    </script>
+</body>
+</html>

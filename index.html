@@ -1,0 +1,65 @@
+    <!DOCTYPE html>
+<html lang="en">
+<head>
+
+    <meta charset="UTF-8" />
+
+    <meta name="viewport"
+          content="width=device-width,
+                   initial-scale=1.0" />
+
+    <title>System Override</title>
+
+    <link rel="stylesheet"
+          href="css/matrix.css">
+
+</head>
+
+<body>
+
+    <canvas id="matrixCanvas"></canvas>
+
+    <div class="terminal-container">
+
+        <h1>System Locked</h1>
+
+        <p class="instructions">
+            > Unscramble the identity
+            to bypass authentication...
+        </p>
+
+        <div class="puzzle-area">
+
+            <div class="letter-pool"
+                 id="letterPool"></div>
+
+            <div class="slots-container"
+                 id="slotsContainer"></div>
+
+        </div>
+
+        <button class="btn-reset"
+                onclick="playClickSound(); initPuzzle()">
+
+            Reset Matrix
+
+        </button>
+
+    </div>
+
+    <div class="success-screen"
+         id="successScreen">
+
+        <h2>ACCESS GRANTED</h2>
+
+        <p>
+            Loading Stage 2:
+            Birthday Chamber initialization...
+        </p>
+
+    </div>
+
+    <script src="js/matrix.js"></script>
+
+</body>
+</html>
