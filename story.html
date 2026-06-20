@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+  <title>Happy Birthday</title>
+
+  <!-- External Stylesheet -->
+  <link rel="stylesheet" href="css/story.css">
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700;900&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,400;0,700;1,400;1,700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Edu+TAS+Beginner:wght@400..700&display=swap" rel="stylesheet">
+
+  <!-- Canvas Confetti Library -->
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.2/dist/confetti.browser.min.js"></script>
+
+</head>
+<body>
+
+<!-- STORY MUSIC -->
+<audio id="bg-music" loop preload="auto">
+  <source src="assets/story.mp3" type="audio/mpeg">
+</audio>
+
+<div id="music-toggle" onclick="toggleMusic()">
+  <span id="music-icon">&#128263;</span>
+</div>
+
+<div id="scroll-hint">
+  
+ <p>SCROLL TO SEE MORE</p>
+</div>
+
+<div class="scroll-space">
+  <div class="viewport" id="vp">
+    <canvas id="ending-mosaic" aria-hidden="true"></canvas>
+    <div id="ending-wrap">
+      <h1>HAPPY<br>BIRTHDAY</h1>
+      <p id="ending-quote"> कहीं फोन  ना पटक दो तो इसलिए मैं अब जा रहा हु | <br>Bye Bye रामू काका</p>
+      
+      <!-- Engaging Confetti Button -->
+      <div style="display: flex; gap: 10px; justify-content: center; align-items: center; margin-bottom: 15px; flex-wrap: wrap;">
+        <button class="celebrate-btn" onclick="fireConfetti()" style="padding: 12px 24px; font-family: 'Poppins', sans-serif; font-weight: 700; background: linear-gradient(45deg, #ff6b6b, #feca57); border: none; border-radius: 30px; color: white; cursor: pointer; font-size: 16px; box-shadow: 0 4px 15px rgba(255, 107, 107, 0.4); transition: transform 0.2s;">
+          Confetti! 🎉
+        </button>
+
+        <button id="saveMemoriesBtn" class="download-btn" onclick="handleSaveMemories()" style="position: relative; overflow: hidden; margin: 0; padding: 12px 24px; background: rgba(255,255,255,0.15); border: 2px solid rgba(255,255,255,0.4); border-radius: 30px; color: white; cursor: pointer; transition: transform 0.2s;">
+          <div id="saveProgressBar" style="position: absolute; left: 0; top: 0; height: 100%; width: 0%; background: linear-gradient(45deg, #4facfe, #00f2fe); z-index: 1; transition: width 2s ease-in-out;"></div>
+          <span id="saveBtnText" style="position: relative; z-index: 2; font-family: 'Poppins', sans-serif; font-weight: 700; font-size: 16px;">Save Memories</span>
+        </button>
+      </div>
+      <span class="save-hint">Tap to Save Memories to view Photos</span>
+    </div>
+  </div>
+</div>
+
+<!-- External Script -->
+<script src="js/story.js"></script>
+
+<!-- Confetti Logic -->
+<script>
+  function fireConfetti() {
+    confetti({
+      particleCount: 150,
+      spread: 80,
+      origin: { y: 0.6 },
+      colors: ['#ff0000', '#00ff00', '#0000ff', '#ffff00', '#ff00ff']
+    });
+    
+    // Optional: Add a small scaling animation to the button when clicked
+    const btn = document.querySelector('.celebrate-btn');
+    btn.style.transform = 'scale(0.95)';
+    setTimeout(() => btn.style.transform = 'scale(1)', 150);
+  }
+
+      function handleSaveMemories() {
+        const btn = document.getElementById('saveMemoriesBtn');
+        const bar = document.getElementById('saveProgressBar');
+        const text = document.getElementById('saveBtnText');
+        
+        if (btn.disabled) return;
+        btn.disabled = true; // Prevent multiple clicks
+
+        fireConfetti();
+        btn.style.transform = 'scale(0.95)';
+        setTimeout(() => btn.style.transform = 'scale(1)', 150);
+
+        text.innerText = "Saving... ⏳";
+        bar.style.width = '100%'; // Start filling the progress bar
+
+        // Wait for the bar to fill (2 seconds) before redirecting
+        setTimeout(() => {
+          text.innerText = "Saved! ✨";
+          window.open('https://photos.app.goo.gl/2e8fVCYYe1d36pci6', '_blank');
+          
+          // Reset the button after a few seconds in case the user returns to the page
+          setTimeout(() => {
+            bar.style.width = '0%';
+            text.innerText = "Save Memories";
+            btn.disabled = false;
+          }, 3000);
+        }, 2000);
+      }
+</script>
+</body>
+</html>

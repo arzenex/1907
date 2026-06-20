@@ -1,0 +1,661 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>A Story for Divya ✨</title>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+
+    <!-- Canvas Confetti -->
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.2/dist/confetti.browser.min.js"></script>
+
+    <style>
+        :root {
+            --bg: #e6b3c8;
+            --primary: #ff1493;
+            --gold: #ff69b4;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+
+        html,
+        body {
+            width: 100%;
+            background-color: var(--bg);
+            color: #4a0e4e;
+            font-family: 'Poppins', sans-serif;
+            overflow-x: hidden;
+            scroll-behavior: smooth;
+        }
+
+        /* Floating music control */
+        #music-toggle {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 10000;
+            width: 44px;
+            height: 44px;
+            cursor: pointer;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: transform 0.2s, background 0.2s;
+        }
+
+        #music-toggle:hover {
+            transform: scale(1.08);
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        #music-toggle span {
+            font-size: 1.2rem;
+        }
+
+        /* Header section */
+        header {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            padding: 20px;
+        }
+
+        header h1 {
+            font-size: clamp(1.8rem, 6vw, 2.8rem);
+            font-weight: 700;
+            margin-bottom: 10px;
+            letter-spacing: 1px;
+            color: #4a0e4e;
+        }
+
+        header p {
+            color: rgba(74, 14, 78, 0.7);
+            font-size: clamp(0.85rem, 2.5vw, 1rem);
+            letter-spacing: 2px;
+            text-transform: uppercase;
+        }
+
+        .scroll-down {
+            margin-top: 30px;
+            font-size: 0.75rem;
+            color: var(--gold);
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            animation: bounce 2s infinite;
+        }
+
+        @keyframes bounce {
+
+            0%,
+            20%,
+            50%,
+            80%,
+            100% {
+                transform: translateY(0);
+            }
+
+            40% {
+                transform: translateY(-6px);
+            }
+
+            60% {
+                transform: translateY(-3px);
+            }
+        }
+
+        @keyframes float {
+            0%, 100% {
+                transform: translateY(0) rotate(0deg);
+            }
+            50% {
+                transform: translateY(-30px) rotate(15deg);
+            }
+        }
+
+        /* Story container */
+        .timeline-container {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 0 16px 100px 16px;
+        }
+
+        /* Scroll Animation Sections */
+        .story-section {
+            margin-bottom: clamp(100px, 25vh, 250px);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            opacity: 0;
+            transform: translateY(40px) scale(0.96);
+            transition: opacity 1s cubic-bezier(0.25, 1, 0.5, 1), transform 1s cubic-bezier(0.25, 1, 0.5, 1);
+            width: 100%;
+        }
+
+        .story-section.visible {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+        }
+
+        /* Image Display - Original aspect ratio, fully visible clearly */
+        .story-image {
+            width: 100%;
+            height: auto;
+            max-height: 70vh;
+            object-fit: contain;
+            border-radius: 16px;
+            border: 6px solid #ffb6c1; /* Girly pink border */
+            box-shadow: 0 10px 30px rgba(255, 105, 180, 0.3);
+            display: block;
+            transition: transform 0.6s cubic-bezier(0.25, 1, 0.5, 1), box-shadow 0.6s, border-color 0.6s;
+        }
+
+        .story-image:hover {
+            transform: scale(1.02);
+            border-color: #ff69b4;
+            box-shadow: 0 15px 40px rgba(255, 105, 180, 0.5);
+        }
+
+        .story-title {
+            font-size: clamp(0.95rem, 3vw, 1.2rem);
+            color: #4a0e4e;
+            margin-top: 18px;
+            font-weight: 600;
+            letter-spacing: 1px;
+            text-align: center;
+            opacity: 0;
+            transform: translateY(10px);
+            transition: opacity 0.8s ease 0.3s, transform 0.8s ease 0.3s;
+        }
+
+        .story-section.visible .story-title {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* Final Reveal Card */
+        .final-reveal {
+            text-align: center;
+            padding: 40px 20px;
+            width: 100%;
+        }
+
+        .final-reveal h2 {
+            font-size: clamp(1.8rem, 6vw, 2.5rem);
+            font-weight: 700;
+            color: #ff1493;
+            margin-bottom: 15px;
+            letter-spacing: 1px;
+        }
+
+        .final-reveal p {
+            color: rgba(74, 14, 78, 0.8);
+            margin-bottom: 30px;
+            font-size: clamp(0.9rem, 2.8vw, 1rem);
+            line-height: 1.6;
+        }
+
+        .memories-btn {
+            display: inline-block;
+            padding: 12px 36px;
+            font-size: 0.95rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            background: #ff69b4;
+            color: #ffffff;
+            border: none;
+            border-radius: 30px;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            text-decoration: none;
+        }
+
+        .memories-btn:hover {
+            transform: scale(1.04);
+            box-shadow: 0 0 20px rgba(255, 105, 180, 0.6);
+        }
+
+        .footer-end {
+            margin-top: 30px;
+            font-size: 0.75rem;
+            color: rgba(74, 14, 78, 0.5);
+            letter-spacing: 2px;
+            text-transform: uppercase;
+        }
+
+        /* Modal Styles */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(230, 179, 200, 0.85); /* Slightly darker frosted glass */
+            backdrop-filter: blur(8px);
+            z-index: 20000;
+            display: none;
+            justify-content: center;
+            align-items: center;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            padding: 20px;
+        }
+
+        .modal-overlay.active {
+            display: flex;
+            opacity: 1;
+        }
+
+        .modal-content {
+            background: rgba(230, 179, 200, 0.95);
+            border: 2px solid #ffb6c1;
+            border-radius: 16px;
+            width: 100%;
+            max-width: 800px;
+            max-height: 85vh;
+            overflow-y: auto;
+            position: relative;
+            padding: 30px;
+            box-shadow: 0 20px 50px rgba(255, 105, 180, 0.3);
+            transform: translateY(20px) scale(0.95);
+            transition: transform 0.3s cubic-bezier(0.25, 1, 0.5, 1);
+        }
+
+        .modal-overlay.active .modal-content {
+            transform: translateY(0) scale(1);
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+            border-bottom: 1px solid rgba(255, 182, 193, 0.5);
+            padding-bottom: 15px;
+        }
+
+        .modal-header h3 {
+            font-size: 1.5rem;
+            color: #ff1493;
+            font-weight: 600;
+        }
+
+        .close-btn {
+            background: none;
+            border: none;
+            color: #ff1493;
+            font-size: 2rem;
+            cursor: pointer;
+            opacity: 0.7;
+            transition: opacity 0.2s;
+        }
+
+        .close-btn:hover {
+            opacity: 1;
+        }
+
+        .gallery-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+            gap: 20px;
+        }
+
+        .gallery-item {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            background: rgba(255, 255, 255, 0.5);
+            padding: 10px;
+            border-radius: 10px;
+            border: 1px solid #ffb6c1;
+            align-items: center;
+        }
+
+        .gallery-img {
+            width: 100%;
+            height: 140px;
+            object-fit: cover;
+            border-radius: 6px;
+        }
+
+        .download-btn {
+            background: var(--primary);
+            color: #fff;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            cursor: pointer;
+            text-transform: uppercase;
+            width: 100%;
+            transition: background 0.2s, transform 0.2s;
+            text-decoration: none;
+            text-align: center;
+        }
+
+        .download-btn:hover {
+            background: #e6399b;
+            transform: scale(1.05);
+        }
+
+        @media (max-width: 480px) {
+            .gallery-grid {
+                grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+                gap: 15px;
+            }
+
+            .modal-content {
+                padding: 20px;
+            }
+
+            .gallery-img {
+                height: 120px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- Background Music -->
+    <audio id="bg-music" loop preload="auto">
+        <source src="assets/story.mp3" type="audio/mpeg">
+    </audio>
+
+    <div id="music-toggle" onclick="toggleMusic()">
+        <span id="music-icon">🔇</span>
+    </div>
+
+    <!-- Header Section -->
+    <header>
+        <h1>memories</h1>
+        <p>Scroll down to begin ✨</p>
+        <div class="scroll-down">↓ Scroll ↓</div>
+    </header>
+
+    <!-- Timeline Story Cards -->
+    <div class="timeline-container">
+
+        <!-- Section 1 -->
+        <div class="story-section">
+            <img class="story-image" loading="lazy" src="assets/img1.webp" alt="Cute">
+            <div class="story-title">Some see you as cute</div>
+        </div>
+
+        <!-- Section 2 -->
+        <div class="story-section">
+            <img class="story-image" loading="lazy" src="assets/img2.webp" alt="Beautiful">
+            <div class="story-title">Some see you as beautiful</div>
+        </div>
+
+        <!-- Section 3 -->
+        <div class="story-section">
+            <img class="story-image" loading="lazy" src="assets/img3.webp" alt="Elegant">
+            <div class="story-title">Some see you as elegant</div>
+        </div>
+
+        <!-- Section 4 -->
+        <div class="story-section">
+            <img class="story-image" loading="lazy" src="assets/img4.webp" alt="Mysterious">
+            <div class="story-title">Some see you as mysterious</div>
+        </div>
+
+        <!-- Section 5 -->
+        <div class="story-section">
+            <img class="story-image" loading="lazy" src="assets/img5.webp" alt="Sunshine">
+            <div class="story-title">Some see you as sunshine</div>
+        </div>
+
+        <!-- Section 6 -->
+        <div class="story-section">
+            <img class="story-image" loading="lazy" src="assets/img6.webp" alt="Chaos">
+            <div class="story-title">Some see you as chaos</div>
+        </div>
+
+        <!-- Section 7 -->
+        <div class="story-section">
+            <img class="story-image" loading="lazy" src="assets/img7.webp" alt="Perfect">
+            <div class="story-title">Some see you as perfect</div>
+        </div>
+
+        <!-- Section 8 -->
+        <div class="story-section">
+            <img class="story-image" loading="lazy" src="assets/img8.webp" alt="Amazing">
+            <div class="story-title">Some see you as Amazing</div>
+        </div>
+
+        <!-- Section 9 -->
+        <div class="story-section">
+            <img class="story-image" loading="lazy" src="assets/img9.webp" alt="Pure Joy">
+            <div class="story-title">Some see you as pure joy 🌻</div>
+        </div>
+
+        <!-- Section 10 -->
+        <div class="story-section">
+            <img class="story-image" loading="lazy" src="assets/img10.webp" alt="Weirdo">
+            <div class="story-title">Some see you as a total weirdo</div>
+        </div>
+
+        <!-- Section 11 -->
+        <div class="story-section">
+            <img class="story-image" loading="lazy" src="assets/img11.webp" alt="Nazar na lage">
+            <div class="story-title">Haye re! Nazar na lage jaye</div>
+        </div>
+
+        <!-- Section 12 -->
+        <div class="story-section">
+            <img class="story-image" loading="lazy" src="assets/img12.webp" alt="I see you as this">
+            <div class="story-title">But I see you as this</div>
+        </div>
+
+        <!-- Section 13: Final Reveal -->
+        <div class="story-section final-section">
+            <div class="final-reveal">
+                <h2>HAPPY BIRTHDAY</h2>
+                <p>May this day bring you endless joy. Tap below to see your memories.</p>
+                <button class="memories-btn" onclick="openModal()">Save Memories ✨</button>
+                <div class="footer-end">Happy Birthday</div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Gallery Modal -->
+    <div class="modal-overlay" id="download-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Your Memories ✨</h3>
+                <button class="close-btn" onclick="closeModal()">&times;</button>
+            </div>
+            <div class="gallery-grid" id="gallery-grid">
+                <!-- Images will be injected here by JS -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const music = document.getElementById('bg-music');
+        const icon = document.getElementById('music-icon');
+
+        // Music toggle logic
+        function toggleMusic() {
+            if (music.paused || music.muted) {
+                music.volume = 0.5;
+                music.muted = false;
+                music.play().then(() => {
+                    icon.innerHTML = '🔊';
+                }).catch(err => console.log("Music play error:", err));
+            } else {
+                music.muted = true;
+                music.pause();
+                icon.innerHTML = '🔇';
+            }
+        }
+
+        // Auto play on user interaction
+        const startMusicOnInteraction = () => {
+            if (music.paused) {
+                music.volume = 0.5;
+                music.muted = false;
+                music.play().then(() => {
+                    icon.innerHTML = '🔊';
+                    window.removeEventListener('scroll', startMusicOnInteraction);
+                    window.removeEventListener('touchmove', startMusicOnInteraction);
+                    window.removeEventListener('click', startMusicOnInteraction);
+                    window.removeEventListener('touchstart', startMusicOnInteraction);
+                }).catch(() => { });
+            }
+        };
+        window.addEventListener('scroll', startMusicOnInteraction);
+        window.addEventListener('touchmove', startMusicOnInteraction);
+        window.addEventListener('click', startMusicOnInteraction);
+        window.addEventListener('touchstart', startMusicOnInteraction);
+
+        // Smooth scroll fade-in using Intersection Observer
+        const sections = document.querySelectorAll('.story-section');
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('visible');
+
+                    // Trigger custom confetti if it is the final section
+                    if (entry.target.classList.contains('final-section')) {
+                        triggerContinuousConfetti();
+                    }
+                }
+            });
+        }, {
+            threshold: 0.1
+        });
+
+        sections.forEach(section => observer.observe(section));
+
+        // Modal & Gallery Logic
+        const imagesList = [
+            'assets/img1.webp', 'assets/img2.webp', 'assets/img3.webp',
+            'assets/img4.webp', 'assets/img5.webp', 'assets/img6.webp',
+            'assets/img7.webp', 'assets/img8.webp', 'assets/img9.webp',
+            'assets/img10.webp', 'assets/img11.webp', 'assets/img12.webp'
+        ];
+
+        function openModal() {
+            fireCelebration();
+            const modal = document.getElementById('download-modal');
+            const grid = document.getElementById('gallery-grid');
+
+            // Populate grid if empty
+            if (grid.children.length === 0) {
+                imagesList.forEach((src, idx) => {
+                    const item = document.createElement('div');
+                    item.className = 'gallery-item';
+                    item.innerHTML = `
+                        <img src="${src}" class="gallery-img" alt="Memory ${idx + 1}" loading="lazy">
+                        <a href="${src}" download="divya_birthday_memory_${idx + 1}.webp" class="download-btn">Download</a>
+                    `;
+                    grid.appendChild(item);
+                });
+            }
+
+            modal.style.display = 'flex';
+            // slight delay to allow display block to render before opacity transition
+            setTimeout(() => {
+                modal.classList.add('active');
+            }, 10);
+        }
+
+        function closeModal() {
+            const modal = document.getElementById('download-modal');
+            modal.classList.remove('active');
+            setTimeout(() => {
+                modal.style.display = 'none';
+            }, 300); // match CSS transition duration
+        }
+
+        // Close modal when clicking outside
+        document.getElementById('download-modal').addEventListener('click', function (e) {
+            if (e.target === this) {
+                closeModal();
+            }
+        });
+
+        // Confetti celebration
+        function fireCelebration() {
+            confetti({
+                particleCount: 150,
+                spread: 80,
+                origin: { y: 0.6 }
+            });
+        }
+
+        let confettiTimer;
+        function triggerContinuousConfetti() {
+            if (confettiTimer) return;
+
+            // Grand initial burst
+            fireCelebration();
+
+            // Slower side blasts
+            let duration = 3 * 1000;
+            let end = Date.now() + duration;
+
+            (function frame() {
+                confetti({
+                    particleCount: 3,
+                    angle: 60,
+                    spread: 55,
+                    origin: { x: 0 }
+                });
+                confetti({
+                    particleCount: 3,
+                    angle: 120,
+                    spread: 55,
+                    origin: { x: 1 }
+                });
+
+                if (Date.now() < end) {
+                    requestAnimationFrame(frame);
+                }
+            }());
+        }
+
+        // Floating background cakes, candies and rasgullas
+        function createFloatingElements() {
+            const elements = ['🎂', '🍬', '🍭', '🟤', '⚪'];
+            const numElements = 25;
+            for (let i = 0; i < numElements; i++) {
+                const el = document.createElement('div');
+                el.innerText = elements[Math.floor(Math.random() * elements.length)];
+                el.style.position = 'fixed';
+                el.style.fontSize = Math.random() * 20 + 25 + 'px';
+                el.style.left = Math.random() * 100 + 'vw';
+                el.style.top = Math.random() * 100 + 'vh';
+                el.style.opacity = Math.random() * 0.3 + 0.15; 
+                el.style.zIndex = '0';
+                el.style.pointerEvents = 'none';
+                el.style.animation = `float ${Math.random() * 10 + 10}s ease-in-out infinite`;
+                el.style.animationDelay = `-${Math.random() * 10}s`; 
+                document.body.appendChild(el);
+            }
+        }
+        createFloatingElements();
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Cinematic Birthday Experience ✨</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700;900&family=Poppins:wght@300;400;600;800&display=swap" rel="stylesheet">
+    
+    <!-- External CSS -->
+    <link rel="stylesheet" href="css/birthday.css">
+
+    <!-- GSAP for Animations -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+</head>
+<body style="user-select: none; -webkit-user-select: none; -webkit-touch-callout: none;">
+
+<!-- HAPPY BIRTHDAY MUSIC -->
+<audio id="bg-music" loop>
+    <source src="assets/birthday.mp3" type="audio/mpeg">
+</audio>
+
+<div id="music-toggle" onclick="toggleMusic()">
+    <span id="music-icon">🔊</span>
+</div>
+
+<div id="intro-overlay">
+    <div class="intro-glow"></div>
+    <div class="intro-card">
+        <div class="intro-title">Birthday Experience</div>
+        <div class="intro-sub">A tiny cinematic surprise awaits you ✨</div>
+        <button class="start-btn" onclick="startApp()">OPEN SURPRISE</button>
+    </div>
+</div>
+
+<div id="main-container">
+    <div class="cake-stage" id="cake-group">
+        <div class="candles-container">
+            <div class="candle c1"><div class="flame"></div></div>
+            <div class="candle c2"><div class="flame"></div></div>
+            <div class="candle c3"><div class="flame"></div></div>
+        </div>
+        <div class="layer layer-top"><div class="frosting-top"></div><div class="dollop" style="left:45%;"></div></div>
+        <div class="layer layer-mid"><div class="frosting-top"></div><div class="dollop" style="left:10%;"></div><div class="dollop" style="right:10%;"></div></div>
+        <div class="layer layer-bottom"><div class="frosting-top"></div></div>
+        <div class="plate"></div>
+    </div>
+
+    <div id="instruction-prompt">
+        <h3 id="hint-text">Shake your phone to light up ✨</h3>
+        <div id="shake-meter-box"><div id="shake-progress"></div></div>
+    </div>
+
+    <div id="final-prompt">
+        <div class="prompt-card">
+            <div class="prompt-glow"></div>
+            <h2>Come On Ramu Kaka...</h2>
+            <p>You can do it ✨</p>
+            <div class="final-line">SHAKE IT ONE MORE TIME</div>
+        </div>
+    </div>
+
+    <div id="birthday-reveal">
+        <div class="glow-orb orb1"></div>
+        <div class="glow-orb orb2"></div>
+        <div class="birthday-content">
+            <div class="birthday-sub">✦ A SPECIAL DAY HAS ARRIVED ✦</div>
+            <h1>HAPPY<br>BIRTHDAY</h1>
+            <div class="birthday-line"></div>
+            <p class="birthday-message">"Another year older, another year wiser. Thanks for all the laughs, the real talk, and being genuinely awesome. Here's to more great times ahead."</p>
+            
+            <button class="go-surprise-btn" onclick="goStory()">SEE SURPRISE ✨</button>
+            
+            <div class="birthday-footer">HAPPY BIRTHDAY</div>
+        </div>
+    </div>
+</div>
+
+<canvas id="canvas"></canvas>
+
+<!-- External JS -->
+<script src="js/birthday.js"></script>
+
+</body>
+</html>

@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Fun Brain Teaser Quiz</title>
+  <link rel="stylesheet" href="css/mcq.css">
+</head>
+<body>
+
+  <div class="app-container">
+    <div id="quiz-screen">
+      <div class="progress-bar">
+        <div class="progress-fill" id="progress-fill"></div>
+      </div>
+      
+      <div style="text-align: left; margin-bottom: 1rem; font-weight: bold; color: #a0522d; font-size: 1.1rem; display: flex; justify-content: flex-start; align-items: center; gap: 8px; min-height: 24px;">
+        Gulab Jamuns: <div id="jamun-stash" style="display: flex; gap: 4px; flex-wrap: wrap;"></div>
+      </div>
+
+      <div id="question-text" class="question-text"></div>
+      
+      <div id="options-container" class="options-container">
+        <!-- Options will be injected here via JS -->
+      </div>
+      
+      <button id="next-btn" class="action-btn" disabled>Next Question</button>
+    </div>
+
+    <div id="result-screen" class="results-container hidden">
+      <h2>Quiz Completed! 🎉</h2>
+      <div class="score-circle">
+        <span id="final-score">0</span>/<span id="total-questions">0</span>
+      </div>
+      <div id="final-jamun-stash" style="display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; margin-bottom: 1.5rem; min-height: 20px;"></div>
+      <p id="result-message" class="question-text"></p>
+      <button id="retry-btn" class="action-btn" onclick="location.reload()">Play Again</button>
+    </div>
+  </div>
+
+  <script src="js/mcq.js"></script>
+</body>
+</html>
