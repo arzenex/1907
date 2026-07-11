@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Our Memories</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #e6b3c8;
+            --primary: #ff1493;
+            --card-bg: rgba(255, 255, 255, 0.1);
+            --text-color: #4a0e4e;
+        }
+        body {
+            background-color: var(--bg);
+            font-family: 'Poppins', sans-serif;
+            color: var(--text-color);
+            margin: 0;
+            padding: 40px 20px;
+            text-align: center;
+        }
+        h1 {
+            font-size: clamp(2rem, 6vw, 3rem);
+            margin-bottom: 10px;
+        }
+        p {
+            font-size: clamp(0.9rem, 2.5vw, 1.1rem);
+            margin-bottom: 40px;
+            color: rgba(74, 14, 78, 0.8);
+        }
+        .memory-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 30px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        .card-container {
+            background-color: transparent;
+            aspect-ratio: 3 / 4;
+            perspective: 1000px;
+            cursor: pointer;
+        }
+        .card-inner {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            transition: transform 0.8s;
+            transform-style: preserve-3d;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+        }
+        .card-container.flipped .card-inner {
+            transform: rotateY(180deg);
+        }
+        .card-front, .card-back {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            -webkit-backface-visibility: hidden;
+            backface-visibility: hidden;
+            border-radius: 15px;
+            overflow: hidden;
+        }
+        .card-front {
+            background-color: var(--card-bg);
+        }
+        .card-front img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        .card-back {
+            background: linear-gradient(135deg, #ffb6c1, #ff69b4);
+            color: white;
+            transform: rotateY(180deg);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        .card-back h3 {
+            font-size: 1.5rem;
+            margin-bottom: 10px;
+        }
+        .card-back p {
+            font-size: 1rem;
+            color: rgba(255,255,255,0.9);
+            margin-bottom: 0;
+        }
+        .download-btn-card {
+            display: inline-block;
+            padding: 8px 18px;
+            background: white;
+            color: var(--primary);
+            border-radius: 20px;
+            text-decoration: none;
+            font-weight: 600;
+            margin-top: 20px;
+            font-size: 0.9rem;
+            transition: transform 0.2s;
+        }
+        .download-btn-card:hover { transform: scale(1.05); }
+        .special-cards-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 30px;
+            max-width: 1200px;
+            margin: 80px auto 40px auto;
+        }
+        .special-card {
+            background: linear-gradient(135deg, #ffb6c1, #ff69b4);
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+            color: white;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+        }
+        .special-card h2 {
+            font-size: 1.8rem;
+            margin-bottom: 15px;
+        }
+        /* This is a new class for the notes to avoid conflict with the body's p tag styles */
+        .special-card .notes {
+            font-size: 1rem;
+            color: rgba(255,255,255,0.9);
+            margin-bottom: 25px;
+            flex-grow: 1;
+        }
+        .special-card-btn {
+            display: inline-block;
+            padding: 12px 24px;
+            background: white;
+            color: var(--primary);
+            border-radius: 30px;
+            text-decoration: none;
+            font-weight: 700;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .special-card-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+        .video-wrapper {
+            position: relative;
+            padding-bottom: 56.25%; /* 16:9 aspect ratio */
+            height: 0;
+            overflow: hidden;
+            border-radius: 10px;
+            border: 3px solid white;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+        .video-wrapper iframe {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+        }
+
+        /* Mobile Optimizations */
+        @media (max-width: 600px) {
+            body {
+                padding: 40px 15px;
+            }
+            .memory-grid {
+                gap: 20px;
+            }
+            .special-cards-container {
+                grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+                margin-top: 60px;
+                gap: 25px;
+            }
+            .special-card {
+                padding: 20px;
+            }
+            .special-card h2 {
+                font-size: 1.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <h1>A Collection of Memories</h1>
+    <p>Click on a card to reveal the memory behind it.</p>
+
+    <div class="memory-grid" id="memory-grid">
+        <!-- Cards will be injected here -->
+    </div>
+
+    <div class="special-cards-container">
+        <!-- YouTube Card 1 -->
+        <div class="special-card">
+            <h2>The Recording IN MAY</h2>
+            <p class="notes">Hope you dont mind!</p>
+            <div class="video-wrapper">
+                <iframe src="https://www.youtube.com/embed/7-eeiFtG5DA" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
+            </div>
+        </div>
+
+        <!-- YouTube Card 2 -->
+        <div class="special-card">
+            <h2>Short Film</h2>
+            <p class="notes">Because one is never enough.</p>
+            <div class="video-wrapper">
+                <iframe src="https://www.youtube.com/embed/JMYr694JLO8" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
+            </div>
+        </div>
+
+        <!-- YouTube Card 3 -->
+        <div class="special-card">
+            <h2>A june Wish </h2>
+            <p class="notes">with inruption</p>
+            <div class="video-wrapper">
+                <iframe src="https://www.youtube.com/embed/atCx01KCJMc" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
+            </div>
+        </div>
+
+        <!-- YouTube Card 4 -->
+        <div class="special-card">
+            <h2>Gam me Duba Mai</h2>
+            <p class="notes">Isi din Islam kabula tha.</p>
+            <div class="video-wrapper">
+                <iframe src="https://www.youtube.com/embed/qkdJ-HWwzwI" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
+            </div>
+        </div>
+
+        <!-- YouTube Card 5 -->
+        <div class="special-card">
+            <h2>The Last Recording</h2>
+            <p class="notes">11 July</p>
+            <div class="video-wrapper">
+                <iframe src="https://www.youtube.com/embed/rsHgxjDtIKI" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
+            </div>
+        </div>
+
+        <!-- Google Photos Card -->
+        <div class="special-card">
+            <h2>Photo Album</h2>
+            <p class="notes">Even more memories are waiting for you here. Click below to see the full gallery!</p>
+            <a href="https://photos.app.goo.gl/iPaa15qrFccQhiT29" target="_blank" class="special-card-btn">
+                View Photos 📸
+            </a>
+        </div>
+    </div>
+
+    <script>
+        const memories = [
+            { img: 'assets/img1.webp', title: 'Cute', description: 'Some see you as cute' },
+            { img: 'assets/img2.webp', title: 'Beautiful', description: 'Some see you as beautiful' },
+            { img: 'assets/img3.webp', title: 'Elegant', description: 'Some see you as elegant' },
+            { img: 'assets/img4.webp', title: 'Mysterious', description: 'Some see you as mysterious' },
+            { img: 'assets/img5.webp', title: 'Sunshine', description: 'Some see you as sunshine' },
+            { img: 'assets/img6.webp', title: 'Chaos', description: 'Some see you as chaos' },
+            { img: 'assets/img7.webp', title: 'Perfect', description: 'Some see you as perfect' },
+            { img: 'assets/img8.webp', title: 'Amazing', description: 'Some see you as Amazing' },
+            { img: 'assets/img9.webp', title: 'Pure Joy', description: 'Some see you as pure joy 🌻' },
+            { img: 'assets/img10.webp', title: 'Weirdo', description: 'Some see you as a total weirdo' },
+            { img: 'assets/img11.webp', title: 'Nazar na lage', description: 'Haye re! Nazar na lage jaye' },
+            { img: 'assets/img12.webp', title: 'This', description: 'But I see you as this' },
+        ];
+
+        const grid = document.getElementById('memory-grid');
+
+        memories.forEach(memory => {
+            const cardContainer = document.createElement('div');
+            cardContainer.className = 'card-container';
+
+            cardContainer.innerHTML = `
+                <div class="card-inner">
+                    <div class="card-front">
+                        <img src="${memory.img}" alt="${memory.title}" loading="lazy">
+                    </div>
+                    <div class="card-back">
+                        <h3>${memory.title}</h3>
+                        <p>${memory.description}</p>
+                        <a href="${memory.img}" download="memory-${memory.title.replace(/ /g, '-').toLowerCase()}" class="download-btn-card">
+                            Download 💾
+                        </a>
+                    </div>
+                </div>
+            `;
+            
+            cardContainer.addEventListener('click', () => {
+                cardContainer.classList.toggle('flipped');
+            });
+
+            // Stop propagation on the download link to prevent the card from flipping back
+            const downloadLink = cardContainer.querySelector('.download-btn-card');
+            if (downloadLink) {
+                downloadLink.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                });
+            }
+
+            grid.appendChild(cardContainer);
+        });
+    </script>
+</body>
+</html>
