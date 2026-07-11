@@ -95,12 +95,12 @@
         // Wait for the bar to fill (2 seconds) before redirecting
         setTimeout(() => {
           text.innerText = "Saved! ✨";
-          window.open('https://photos.app.goo.gl/2e8fVCYYe1d36pci6', '_blank');
+          window.location.href = 'page.html';
           
           // Reset the button after a few seconds in case the user returns to the page
           setTimeout(() => {
             bar.style.width = '0%';
-            text.innerText = "Save Memories";
+            text.innerText = "View Notes";
             btn.disabled = false;
           }, 3000);
         }, 2000);
