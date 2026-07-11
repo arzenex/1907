@@ -91,7 +91,7 @@ function handleMotion(e){
     if(!acc || acc.x === null) return;
     let delta = Math.abs(acc.x - lastX || 0) + Math.abs(acc.y - lastY || 0) + Math.abs(acc.z - lastZ || 0);
 
-    if(state === "WAIT" && delta > 45){
+    if(state === "WAIT" && delta > 60){
         state = "LIT";
         document.querySelectorAll('.flame').forEach(f=>{ f.classList.add('active'); });
         gsap.to("#shake-meter-box",{ opacity:1, duration:0.5 });
