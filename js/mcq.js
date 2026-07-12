@@ -46,7 +46,45 @@ const questions = [
     text: "Divya entered a dark room with:\n• one candle\n• one lantern\n• and one stove.\n\nShe only had one matchstick.\n\nQuestion:\nWhat did Divya light first?",
     options: ["Candle", "Lantern", "Stove", "Matchstick"],
     answerIndex: 3 // Matchstick
-  }
+  },
+  {
+    title: "Who Is Missing?🔍",
+    text: "One day:\nRamu Kaka took a selfie.\nDivya smiled.\nRam Kali waved.\nKamla Bahan stood beside them.\nWhen they looked at the photo, one person was missing.\nNobody was hiding.\nNobody left.\nNobody edited the picture.",
+    options: ["Ramu Kaka", "Divya", "Kamla Bahan", "Ram Kali"],
+    answerIndex: 0 // Ramu Kaka
+  },
+  
+  {
+    title: "The Sleep Champion 💤",
+    text: "The challenge was simple:\nWhoever sleeps the longest wins\n\nRamu Kaka woke up at 8 AM.\nDivya woke up at 9 AM.\nRam Kali woke up at 10 AM.\nKamla Bahan never came to collect the prize.\n\nQuestion:\nWho is the winner?",
+    options: ["Ramu Kaka", "Divya", "Kamla Bahan", "Ram Kali"],
+    answerIndex: 3 // Ram Kali (slept the longest)
+  },
+  {
+    title: "The Restaurant Bill 🍽️",
+    text: "Four friends went to a restaurant.\nWhen the bill arrived:\n    Ramu Kaka looked at Divya.\n    Divya looked at Ram Kali.\n    Ram Kali looked at Kamla Bahan.\n    Kamla Bahan looked at everyone and smiled.\n    A minute later, the bill was paid.",
+    options: ["Ramu Kaka", "Divya", "Kamla Bahan", "Ram Kali"],
+    answerIndex: 2  // Kamla Bahan (paid the bill)
+  },
+  {
+    title: "The Case of the Missing Mangoes 🥭",
+    text: "Divya had just bought a single, perfect, world-record-sized mango. She placed it on the dining table and went to get a knife.\nJust 30 seconds later, she returned... and the mango had vanished!\n    She questioned everyone in the house:\n    Ramu Kaka: \"I was busy dusting the corners of this perfectly circular room.\"\n    Ram Kali: \"I was in the kitchen boiling water so the ice cubes wouldn't get cold.\"\n    Kamla Bahan: \"I was in the hallway reading the newspaper upside down to improve my concentration.\"\n    Divya: \"I was the one who lost the mango, so I couldn't have eaten it... yet!\"\n    But one of you is lying. Who ate the mango?\"\n\nQuestion:\nWho ate the mango?",
+    options: ["Ramu Kaka", "Divya", "Kamla Bahan", "Ram Kali"],
+    answerIndex: 0  // Ramu kaka
+  },
+  {
+    title: "The Mystery of the Blackout Bandit 🕵️‍♂️",
+    text: "The Mystery of the Blackout Bandit\n​The Situation:\nAt exactly 9:00 PM, the entire neighborhood suffered a sudden, pitch-black power outage that lasted for ten minutes. During those ten minutes of darkness, Kamla bahan’s prized, extra-spicy plate of homemade samosas completely vanished from the kitchen counter.\nWhen the lights came back on, she immediately interrogated everyone:\n Ramu kaka: Don't look at me! I was in the store room trying to find a candle, stubbing my toe the entire time.\n​Divya: I was so scared of the dark that I just sat on the living room sofa, covering my eyes until the lights came back.\n​Ram kali:I didn't do it! I was in my bedroom passing the time by reading a magazine using the glowing light from the television screen\n​The Question:\n​Who is definitely Samosa Bandit?",
+    options: ["Ramu Kaka", "Divya", "Kamla Bahan", "Ram Kali"],
+    answerIndex: 3  // Ramu Kali
+  },
+
+  {
+    title: "The Monsoon Thunderstorm 🌩️",
+    text: "The Situation:\n\nA sudden, violent 15-minute tropical thunderstorm hit the house, pouring buckets of rain outside. During the chaos, Kamla Bahan accidentally left an expensive, brand-new smartphone on the open veranda coffee table. When the rain finally stopped, the phone had vanished without a trace.\n\nDetermined to solve the mystery, Kamla Bahan gathered everyone in the house and asked where they had been during the storm.\n\nRamu Kaka: \"I was hiding under three blankets in my room. The thunder was so loud it was scaring my poor old knees!\"\n\nRam Kali: \"I ran straight to the kitchen to fry hot pakoras. Everyone knows rainy weather requires immediate fried snacks!\"\n\nDivya: \"I was out in the open garden with a watering can, carefully watering your favorite rose bushes so they wouldn't dry out and die.\"\n\nThe Question:\nWho cooked up a completely ridiculous excuse to cover their tracks?",
+    options: ["Ramu Kaka", "Divya", "Kamla Bahan", "Ram Kali"],
+    answerIndex: 1 // Divya
+  },
 ];
 
 let currentQuestionIndex = 0;
@@ -196,7 +234,7 @@ function showResults() {
     finalStash.appendChild(mini);
   }
 
-  if (score >= 5) {
+  if (score >= 10) {
     resultMessage.textContent = `Congratulations! You passed and kept ${score} Gulab Jamun(s)! 🎉`;
     resultMessage.style.color = "var(--success-color)";
     resultMessage.style.fontWeight = "bold";
@@ -227,7 +265,7 @@ function showResults() {
       }
     }, 300);
   } else {
-    resultMessage.textContent = `Not enough Gulab Jamuns for the next step! Please collect a minimum of 5 Gulab Jamuns (you only have ${score}).`;
+    resultMessage.textContent = `Not enough Gulab Jamuns for the next step! Please collect a minimum of 10 Gulab Jamuns (you only have ${score}).`;
     resultMessage.style.color = "var(--error-color)";
     resultMessage.style.fontWeight = "bold";
     retryBtn.textContent = "Retry";
