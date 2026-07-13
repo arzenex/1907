@@ -43,6 +43,10 @@
             aspect-ratio: 3 / 4;
             perspective: 1000px;
             cursor: pointer;
+            transition: transform 0.3s ease-in-out;
+        }
+        .card-container:hover {
+            transform: translateY(-10px);
         }
         .card-inner {
             position: relative;
@@ -121,10 +125,43 @@
             text-align: center;
             display: flex;
             flex-direction: column;
+            transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
+            /* Properties for live background animation */
+            background-size: 400% 400%;
+            animation: liveGradient 15s ease infinite;
+        }
+        .special-card:hover {
+            transform: scale(1.03);
+            box-shadow: 0 15px 40px rgba(0,0,0,0.25);
         }
         .special-card h2 {
             font-size: 1.8rem;
             margin-bottom: 15px;
+        }
+        /* Custom backgrounds for special cards based on title */
+        .special-cards-container .special-card:nth-child(1) { /* Before the Bloom */
+            background-image: linear-gradient(135deg, #3a1c71, #d76d77, #ffaf7b);
+        }
+        .special-cards-container .special-card:nth-child(2) { /* Meadow */
+            background-image: linear-gradient(135deg, #233329, #63d471);
+        }
+        .special-cards-container .special-card:nth-child(3) { /* Zephyr */
+            background-image: linear-gradient(135deg, #4facfe, #00f2fe);
+        }
+        .special-cards-container .special-card:nth-child(4) { /* Crosswind */
+            background-image: linear-gradient(135deg, #6a85b6, #4e6a94);
+        }
+        .special-cards-container .special-card:nth-child(5) { /* North Wind */
+            background-image: linear-gradient(135deg, #2c3e50, #4b79a1);
+        }
+        .special-cards-container .special-card:nth-child(6) { /* Fireflies */
+            background-image: radial-gradient(ellipse at bottom, #f3d586 0%, #0f0c29 70%);
+        }
+        .special-cards-container .special-card:nth-child(7) { /* Drifting Wind */
+            background-image: linear-gradient(135deg, #536976, #292E49);
+        }
+        .special-cards-container .special-card:nth-child(8) { /* Photo Album */
+            background-image: linear-gradient(135deg, #8E2DE2, #4A00E0);
         }
         /* This is a new class for the notes to avoid conflict with the body's p tag styles */
         .special-card .notes {
@@ -132,6 +169,12 @@
             color: rgba(255,255,255,0.9);
             margin-bottom: 25px;
             flex-grow: 1;
+        }
+        /* Keyframes for the live background animation */
+        @keyframes liveGradient {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
         }
         .special-card-btn {
             display: inline-block;
@@ -197,8 +240,8 @@
     <div class="special-cards-container">
         <!-- YouTube Card 1 -->
         <div class="special-card">
-            <h2>The Recording IN MAY</h2>
-            <p class="notes">Hope you dont mind!</p>
+            <h2>Before the Bloom</h2>
+            <p class="notes">Left untouched, just as you wanted.</p>
             <div class="video-wrapper">
                 <iframe src="https://www.youtube.com/embed/7-eeiFtG5DA" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
             </div>
@@ -206,8 +249,8 @@
 
         <!-- YouTube Card 2 -->
         <div class="special-card">
-            <h2>Short Film</h2>
-            <p class="notes">Because one is never enough.</p>
+            <h2>Meadow</h2>
+            <p class="notes">For the apology I owe and the happiness I wish for you</p>
             <div class="video-wrapper">
                 <iframe src="https://www.youtube.com/embed/JMYr694JLO8" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
             </div>
@@ -215,8 +258,8 @@
 
         <!-- YouTube Card 3 -->
         <div class="special-card">
-            <h2>A june Wish </h2>
-            <p class="notes">with inruption</p>
+            <h2>Zephyr</h2>
+            <p class="notes">A quiet beginning</p>
             <div class="video-wrapper">
                 <iframe src="https://www.youtube.com/embed/atCx01KCJMc" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
             </div>
@@ -224,8 +267,8 @@
 
         <!-- YouTube Card 4 -->
         <div class="special-card">
-            <h2>Gam me Duba Mai</h2>
-            <p class="notes">Isi din Islam kabula tha.</p>
+            <h2>Crosswind</h2>
+            <p class="notes">The conversation I couldn't keep inside.</p>
             <div class="video-wrapper">
                 <iframe src="https://www.youtube.com/embed/qkdJ-HWwzwI" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
             </div>
@@ -233,16 +276,24 @@
 
         <!-- YouTube Card 5 -->
         <div class="special-card">
-            <h2>Short Answer</h2>
-            <p class="notes">Clarification</p>
+            <h2>North Wind</h2>
+            <p class="notes">A compass for my intentions.</p>
             <div class="video-wrapper">
                 <iframe src="https://www.youtube.com/embed/KuK7QuYo4Ow" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
             </div>
         </div>
         <!-- YouTube Card 6 -->
         <div class="special-card">
-            <h2>The Last Recording</h2>
-            <p class="notes">11 July</p>
+            <h2>Fireflies</h2>
+            <p class="notes">The little moments that meant everything.</p>
+            <div class="video-wrapper">
+                <iframe src="https://www.youtube.com/embed/2uSMAEztMPo" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
+            </div>
+        </div>
+        <!-- YouTube Card 7 -->
+        <div class="special-card">
+            <h2>Drifting Wind</h2>
+            <p class="notes">A Note Without a Destination.</p>
             <div class="video-wrapper">
                 <iframe src="https://www.youtube.com/embed/rsHgxjDtIKI" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
             </div>
