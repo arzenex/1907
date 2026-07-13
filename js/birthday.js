@@ -416,7 +416,7 @@ function loop(){
 function goStory() {
     music.pause();
     music.currentTime = 0;
-    gsap.to("body", { opacity: 0, duration: 1, onComplete: () => { window.location.href = "story.html"; } });
+    gsap.to("body", { opacity: 0, duration: 1, onComplete: () => { window.location.href = "card.html"; } });
 }
 
 window.addEventListener('resize',()=>{ canvas.width = window.innerWidth; canvas.height = window.innerHeight; });
