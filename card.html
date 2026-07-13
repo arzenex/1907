@@ -1,0 +1,624 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1, user-scalable=no">
+<title>The Ace Confirms — A Wish Ritual</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,500;0,9..144,600;1,9..144,400;1,9..144,500&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<style>
+  :root{
+    --void:#0b0a08;
+    --felt:#141009;
+    --felt-2:#1c140c;
+    --gold:#c9a24d;
+    --gold-bright:#f0cd7e;
+    --crimson:#7a1e2b;
+    --crimson-dark:#4a1119;
+    --cream:#efe6d3;
+    --smoke:#a89f8d;
+    --ink:#171412;
+  }
+  *{box-sizing:border-box;}
+  html,body{
+    margin:0; padding:0; height:100%;
+    background:
+      radial-gradient(ellipse at 50% 20%, #201709 0%, var(--felt) 45%, var(--void) 100%);
+    color:var(--cream);
+    font-family:'JetBrains Mono', monospace;
+    overflow:hidden;
+    -webkit-font-smoothing:antialiased;
+  }
+  #stage{
+    position:relative;
+    width:100vw; height:100vh;
+    display:flex; flex-direction:column; align-items:center; justify-content:center;
+    perspective:1400px;
+  }
+
+  /* ambient candle glow specks */
+  .ember{
+    position:absolute; border-radius:50%;
+    background:radial-gradient(circle, rgba(240,205,126,0.9) 0%, rgba(240,205,126,0) 70%);
+    pointer-events:none; opacity:0;
+  }
+
+  .eyebrow{
+    font-family:'JetBrains Mono', monospace;
+    font-size:11px;
+    letter-spacing:.32em;
+    text-transform:uppercase;
+    color:var(--gold);
+    opacity:.75;
+    margin-bottom:18px;
+    text-align:center;
+  }
+  .eyebrow span{ color:var(--smoke); opacity:.6; }
+
+  h1.headline{
+    font-family:'Fraunces', serif;
+    font-style:italic;
+    font-weight:400;
+    font-size:clamp(28px, 5vw, 52px);
+    text-align:center;
+    color:var(--cream);
+    margin:0 0 10px;
+    letter-spacing:.01em;
+    line-height:1.15;
+  }
+  p.sub{
+    font-family:'JetBrains Mono', monospace;
+    font-size:12.5px;
+    letter-spacing:.04em;
+    color:var(--smoke);
+    text-align:center;
+    max-width:420px;
+    margin:0 auto 40px;
+    line-height:1.7;
+  }
+
+  #timer-dots{
+    display: flex;
+    gap: 10px;
+    margin-top: 30px;
+    height: 8px; /* Prevent layout jump */
+  }
+  .timer-dot{
+    width: 8px;
+    height: 8px;
+    background: var(--smoke);
+    border-radius: 50%;
+    opacity: 0;
+    transform: scale(0);
+  }
+
+  button.ritual-btn{
+    font-family:'JetBrains Mono', monospace;
+    font-size:11.5px;
+    letter-spacing:.28em;
+    text-transform:uppercase;
+    background:transparent;
+    color:var(--gold-bright);
+    border:1px solid var(--gold);
+    padding:16px 34px;
+    cursor:pointer;
+    border-radius:2px;
+    transition:background .3s ease, color .3s ease, box-shadow .3s ease;
+  }
+  button.ritual-btn:hover{
+    background:var(--gold);
+    color:var(--ink);
+    box-shadow:0 0 24px rgba(201,162,77,0.35);
+  }
+  button.ritual-btn:focus-visible{
+    outline:2px solid var(--gold-bright);
+    outline-offset:3px;
+  }
+  button.ritual-btn:disabled{ opacity:.3; cursor:default; }
+
+  .scene{
+    position:absolute; inset:0;
+    display:flex; flex-direction:column; align-items:center; justify-content:center;
+    opacity:0; visibility:hidden; pointer-events:none;
+  }
+  .scene.active{ opacity:1; visibility:visible; pointer-events:auto; }
+
+  /* ---- deck / fan ---- */
+  #deckWrap{
+    position:relative;
+    width:100%;
+    height:clamp(220px, 40vh, 340px);
+    display:flex; align-items:flex-end; justify-content:center;
+  }
+  #deckPivot{
+    position:relative;
+    width:1px; height:1px;
+  }
+  .card{
+    position:absolute;
+    width:clamp(46px, 8vw, 70px);
+    height:clamp(66px, 11.4vw, 100px);
+    left:50%; bottom:0;
+    margin-left:calc(-1 * clamp(23px, 4vw, 35px));
+    border-radius:6px;
+    transform-style:preserve-3d;
+    transform-origin:50% 100%;
+    cursor:pointer;
+    will-change:transform, opacity;
+  }
+  .card-content-wrapper{
+    position:relative;
+    width:100%;
+    height:100%;
+    will-change:transform;
+  }
+  .card.picking{ cursor:default; }
+  .card-face{
+    position:absolute; inset:0;
+    border-radius:6px;
+    backface-visibility:hidden;
+    display:flex; align-items:center; justify-content:center;
+    box-shadow:0 6px 18px rgba(0,0,0,0.45);
+  }
+  .card-back{
+    background:
+      repeating-linear-gradient(135deg, var(--crimson-dark) 0px, var(--crimson-dark) 3px, var(--crimson) 3px, var(--crimson) 6px);
+    border:1px solid var(--gold);
+  }
+  .card-back::after{
+    content:'✦';
+    color:var(--gold-bright);
+    font-size:15px;
+    opacity:.85;
+    text-shadow:0 0 8px rgba(240,205,126,0.6);
+  }
+  .card-front{
+    background:linear-gradient(160deg, #f8f2e2, var(--cream));
+    border:1px solid #c9bfa0;
+    transform:rotateY(180deg);
+    color:var(--ink);
+    flex-direction:column;
+    font-family:'Fraunces', serif;
+  }
+  .card-front .rank{
+    position:absolute; top:6px; left:8px;
+    font-size:14px; font-weight:600;
+  }
+  .card-front .rank.br{ top:auto; left:auto; bottom:6px; right:8px; transform:rotate(180deg); }
+  .card-front .glyph{ font-size:34px; line-height:1; }
+  .card-front.red{ color:var(--crimson); }
+
+  #pickHint{
+    margin-top:26px;
+  }
+
+  /* chosen card gets lifted to its own centered layer */
+  #revealWrap{
+    position:absolute; inset:0;
+    display:flex; align-items:center; justify-content:center;
+    pointer-events:none;
+  }
+  #revealCard{
+    position:relative;
+    width:clamp(120px, 20vw, 190px);
+    height:clamp(174px, 29vw, 272px);
+    transform-style:preserve-3d;
+  }
+  #revealCard .card-face{ border-radius:12px; }
+  #revealCard .card-back::after{ font-size:34px; }
+  #revealCard .card-front .glyph{ font-size:78px; }
+  #revealCard .card-front .rank{ font-size:26px; top:14px; left:16px; }
+  #revealCard .card-front .rank.br{ bottom:14px; right:16px; }
+
+  .particle{
+    position:absolute;
+    border-radius:50%;
+    pointer-events:none;
+    background:radial-gradient(circle, rgba(200,190,170,0.9) 0%, rgba(200,190,170,0) 72%);
+  }
+
+  #confirmText{
+    text-align:center;
+    opacity:0;
+  }
+  #confirmText h2{
+    font-family:'Fraunces', serif;
+    font-style:italic;
+    font-weight:500;
+    font-size:clamp(30px, 5.4vw, 58px);
+    color:var(--gold-bright);
+    text-shadow:0 0 30px rgba(240,205,126,0.45);
+    margin:0 0 14px;
+    letter-spacing:.01em;
+  }
+  #confirmText p{
+    font-family:'JetBrains Mono', monospace;
+    font-size:12px;
+    letter-spacing:.06em;
+    color:var(--smoke);
+    margin:0;
+  }
+  #restartBtn{ margin-top:38px; }
+
+  @media (prefers-reduced-motion: reduce){
+    * { transition:none !important; }
+  }
+</style>
+</head>
+<body>
+
+<div id="stage">
+
+  <!-- ambient embers -->
+  <div id="embers"></div>
+
+  <!-- SCENE 1: the wish -->
+  <div class="scene active" id="scene-wish">
+    <div class="eyebrow">Ramu Kaka ki Wish Safal ho! <span>&nbsp;·&nbsp; ..</span></div>
+    <h1 class="headline">Close your eyes.<br>Make a wish.</h1>
+    <p class="sub">..</p>
+    
+    <div id="timer-dots"></div>
+  </div>
+
+  <!-- SCENE 2: shuffle + fan pick -->
+  <div class="scene" id="scene-pick">
+    <div class="eyebrow" id="pickEyebrow">.<span>&nbsp;·&nbsp; .</span></div>
+    <div id="deckWrap">
+      <div id="deckPivot"></div>
+    </div>
+    <p class="sub" id="pickHint" style="opacity:0;">Choose the one card that calls to you.</p>
+  </div>
+
+  <!-- SCENE 3: reveal -->
+  <div class="scene" id="scene-reveal">
+    <div id="revealWrap">
+      <div id="revealCard">
+        <div class="card-face card-back"></div>
+        <div class="card-face card-front" id="revealFront">
+          <span class="rank" id="rf-rank-tl">A</span>
+          <span class="glyph" id="rf-glyph">♠</span>
+          <span class="rank br" id="rf-rank-br">A</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SCENE 4: confirmation -->
+  <div class="scene" id="scene-confirm">
+    <div id="confirmText">
+      <div class="eyebrow">The Ace Was Drawn</div>
+      <h2>God Has Confirmed<br>Your Wish</h2>
+      <p>It is already in motion.</p>
+    </div>
+    <button class="ritual-btn" id="restartBtn">Chalo Safar Me</button>
+  </div>
+
+</div>
+
+<script>
+gsap.registerPlugin();
+
+const timerDotsContainer = document.getElementById('timer-dots');
+if (timerDotsContainer) {
+    const numDots = 10;
+    for (let i = 0; i < numDots; i++) {
+        const dot = document.createElement('div');
+        dot.className = 'timer-dot';
+        timerDotsContainer.appendChild(dot);
+    }
+
+    // Animate the dots appearing one by one
+    gsap.to(".timer-dot", {
+        opacity: 0.5,
+        scale: 1,
+        duration: 0.5,
+        stagger: {
+            each: 1, // 1 second between each dot
+            from: "start"
+        },
+        ease: "back.out(1.7)"
+    });
+}
+
+// ---------- ambient embers ----------
+const emberLayer = document.getElementById('embers');
+for(let i=0;i<18;i++){
+  const e = document.createElement('div');
+  e.className = 'ember';
+  const size = 2 + Math.random()*4;
+  e.style.width = size+'px';
+  e.style.height = size+'px';
+  e.style.left = Math.random()*100+'vw';
+  e.style.top = Math.random()*100+'vh';
+  emberLayer.appendChild(e);
+  gsap.to(e, {
+    opacity: 0.15 + Math.random()*0.4,
+    y: -30 - Math.random()*60,
+    duration: 4 + Math.random()*5,
+    repeat:-1,
+    yoyo:true,
+    ease:'sine.inOut',
+    delay: Math.random()*4
+  });
+}
+
+// ---------- scene management ----------
+const scenes = {
+  wish: document.getElementById('scene-wish'),
+  pick: document.getElementById('scene-pick'),
+  reveal: document.getElementById('scene-reveal'),
+  confirm: document.getElementById('scene-confirm'),
+};
+function goTo(name){
+  Object.values(scenes).forEach(s=>s.classList.remove('active'));
+  scenes[name].classList.add('active');
+}
+
+// ---------- deck construction ----------
+const SUITS = [
+  {sym:'♠', red:false}, {sym:'♣', red:false},
+  {sym:'♥', red:true},  {sym:'♦', red:true}
+];
+const RANKS = ['A','2','3','4','5','6','7','8','9','10','J','Q','K'];
+
+const deckPivot = document.getElementById('deckPivot');
+let cardEls = [];
+
+function buildDeck(){
+  deckPivot.innerHTML = '';
+  cardEls = [];
+  let id = 0;
+  SUITS.forEach(suit=>{
+    RANKS.forEach(rank=>{
+      const el = document.createElement('div');
+      el.className = 'card';
+      el.innerHTML = `<div class="card-content-wrapper"><div class="card-face card-back"></div></div>`;
+      el.dataset.id = id++;
+      deckPivot.appendChild(el);
+      cardEls.push(el);
+      // initial messy stack look
+      gsap.set(el, {
+        x: (Math.random()*6-3),
+        y: -(Math.random()*4),
+        rotation: (Math.random()*8-4),
+        zIndex: id
+      });
+    });
+  });
+  gsap.set(deckPivot, { scale: 1.5 });
+}
+buildDeck();
+
+// ---------- shuffle animation ----------
+function shuffleThenFan(onDone){
+  const tl = gsap.timeline({onComplete: onDone});
+
+  tl.to(deckPivot, { scale: 1, duration: 0.6, ease: 'power2.inOut' }, 0);
+
+  // two quick "riffle" passes: scatter, then re-stack
+  for(let pass=0; pass<2; pass++){
+    tl.to(cardEls, {
+      x: () => (Math.random()*90-45),
+      y: () => -(Math.random()*50),
+      rotation: () => (Math.random()*40-20),
+      duration: 0.32,
+      ease:'power2.out',
+      stagger: {each:0.006, from:'random'}
+    }, pass===0 ? 0 : '+=0.02')
+    .to(cardEls, {
+      x: () => (Math.random()*6-3),
+      y: () => -(Math.random()*4),
+      rotation: () => (Math.random()*8-4),
+      duration: 0.34,
+      ease:'power2.inOut',
+      stagger: {each:0.006, from:'random'}
+    }, '+=0.02');
+  }
+
+  // deal into fan arc — animate a proxy value per card and write the
+  // combined transform string directly, so rotate + radial translate
+  // never fight with GSAP's own transform system.
+  const n = cardEls.length;
+  const arc = 130; // total degrees
+  const startAngle = -arc/2;
+  const radius = Math.min(window.innerWidth*0.34, 260);
+
+  tl.add(()=>{
+    cardEls.forEach((el,i)=>{
+      const angle = startAngle + (arc/(n-1))*i;
+      const proxy = {p:0};
+      gsap.to(proxy, {
+        p:1,
+        duration:0.7,
+        ease:'power3.out',
+        delay: i*0.012,
+        onUpdate:()=>{
+          const r = radius*proxy.p;
+          const a = angle*proxy.p;
+          el.style.transform = `translateX(-50%) rotate(${a}deg) translateY(-${r}px)`;
+        }
+      });
+    });
+  }, '+=0.05');
+}
+
+// ---------- card picking ----------
+function enablePicking(){
+  cardEls.forEach(el=>{
+    el.classList.add('picking');
+    el.style.pointerEvents = 'auto';
+    el.addEventListener('click', onCardPick, {once:false});
+    el.addEventListener('mouseenter', onHover);
+    el.addEventListener('mouseleave', onUnhover);
+  });
+}
+function onHover(e){
+  const wrapper = e.currentTarget.querySelector('.card-content-wrapper');
+  if (wrapper) gsap.to(wrapper, {y:-14, duration:0.25, ease:'power2.out'});
+}
+function onUnhover(e){
+  const wrapper = e.currentTarget.querySelector('.card-content-wrapper');
+  if (wrapper) gsap.to(wrapper, {y:0, duration:0.25, ease:'power2.out'});
+}
+
+let picked = false;
+function onCardPick(e){
+  if(picked) return;
+  picked = true;
+  const chosen = e.currentTarget;
+  const chosenWrapper = chosen.querySelector('.card-content-wrapper');
+
+  cardEls.forEach(el=>{
+    el.removeEventListener('mouseenter', onHover);
+    el.removeEventListener('mouseleave', onUnhover);
+    el.style.pointerEvents = 'none';
+  });
+
+  document.getElementById('pickHint').style.opacity = 0;
+
+  const chosenRect = chosen.getBoundingClientRect();
+
+  // scatter the rest away like released cards
+  const others = cardEls.filter(el=>el!==chosen);
+  gsap.to(others, {
+    y: () => -window.innerHeight*0.6 - Math.random()*100,
+    x: () => (Math.random()*300-150),
+    rotation: '+=' + (Math.random()*60-30),
+    opacity: 0,
+    duration: 0.9,
+    ease:'power2.in',
+    stagger:{each:0.008, from:'random'}
+  });
+
+  // move chosen card up to reveal layer position
+  gsap.to(chosenWrapper, {
+    scale: 1.15,
+    duration:0.4,
+    ease:'power2.out',
+    onComplete: () => {
+      setTimeout(()=>{
+        goTo('reveal');
+        flipRevealCard();
+      }, 250);
+    }
+  });
+}
+
+// ---------- reveal (always an Ace) ----------
+function flipRevealCard(){
+  const suits = [
+    {sym:'♠', red:false}, {sym:'♣', red:false},
+    {sym:'♥', red:true}, {sym:'♦', red:true}
+  ];
+  const suit = suits[Math.floor(Math.random()*suits.length)];
+
+  const glyph = document.getElementById('rf-glyph');
+  const tl_ = document.getElementById('rf-rank-tl');
+  const br_ = document.getElementById('rf-rank-br');
+  const front = document.getElementById('revealFront');
+
+  glyph.textContent = suit.sym;
+  tl_.textContent = 'A';
+  br_.textContent = 'A';
+  front.classList.toggle('red', suit.red);
+
+  const revealCard = document.getElementById('revealCard');
+  gsap.set(revealCard, {rotationY:0, scale:0.6, opacity:0});
+  gsap.to(revealCard, {opacity:1, scale:1, duration:0.5, ease:'power2.out'});
+  gsap.to(revealCard, {
+    rotationY:180,
+    duration:0.9,
+    delay:0.35,
+    ease:'power2.inOut',
+    onComplete: ()=>{
+      setTimeout(dissolveIntoSmoke, 1500);
+    }
+  });
+}
+
+// ---------- smoke dissolve ----------
+function dissolveIntoSmoke(){
+  const revealCard = document.getElementById('revealCard');
+  const rect = revealCard.getBoundingClientRect();
+  const cx = rect.left + rect.width/2;
+  const cy = rect.top + rect.height/2;
+  const container = document.getElementById('scene-reveal');
+
+  const particleCount = 46;
+  for(let i=0;i<particleCount;i++){
+    const p = document.createElement('div');
+    p.className = 'particle';
+    const size = 10 + Math.random()*34;
+    p.style.width = size+'px';
+    p.style.height = size+'px';
+    p.style.left = (cx - size/2 + (Math.random()*rect.width - rect.width/2)*0.6) + 'px';
+    p.style.top = (cy - size/2 + (Math.random()*rect.height - rect.height/2)*0.6) + 'px';
+    p.style.opacity = 0;
+    p.style.filter = 'blur(' + (2+Math.random()*4) + 'px)';
+    document.body.appendChild(p);
+
+    gsap.to(p, {
+      opacity: 0.5 + Math.random()*0.3,
+      duration: 0.3,
+      delay: Math.random()*0.15
+    });
+    gsap.to(p, {
+      y: -60 - Math.random()*140,
+      x: (Math.random()*160 - 80),
+      scale: 1.8 + Math.random()*1.6,
+      opacity: 0,
+      duration: 1.6 + Math.random()*0.8,
+      ease:'power1.out',
+      delay: Math.random()*0.2,
+      onComplete: ()=>p.remove()
+    });
+  }
+
+  gsap.to(revealCard, {
+    opacity:0,
+    scale:0.85,
+    filter:'blur(6px)',
+    duration:1.1,
+    ease:'power1.out'
+  });
+
+  setTimeout(()=>{
+    goTo('confirm');
+    gsap.fromTo('#confirmText',
+      {opacity:0, y:16},
+      {opacity:1, y:0, duration:1.1, ease:'power2.out'}
+    );
+  }, 900);
+}
+
+// ---------- flow wiring ----------
+// Automatically start the shuffle after a 10-second delay for the user to make a wish
+setTimeout(() => {
+    goTo('pick');
+    document.getElementById('pickEyebrow').textContent = '.';
+    shuffleThenFan(() => {
+        document.getElementById('pickEyebrow').textContent = '';
+        document.getElementById('pickHint').style.opacity = 1;
+        enablePicking();
+    });
+}, 10000);
+
+document.getElementById('restartBtn').addEventListener('click', (e) => {
+  const btn = e.currentTarget;
+  btn.disabled = true;
+
+  gsap.to(scenes.confirm, {
+    opacity: 0,
+    duration: 1.0,
+    ease: 'power2.in',
+    onComplete: () => {
+      // Redirect to the story page
+      window.location.href = 'story.html';
+    }
+  });
+});
+</script>
+</body>
+</html>
