@@ -1,0 +1,486 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>The Fav 12</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --ink: #17211f;
+      --muted: #5d6a66;
+      --paper: #f5f1e8;
+      --accent: #c54846;
+      --leaf: #6f8b6f;
+      --sky: #7aa4b8;
+      --card-w: clamp(190px, 62vw, 340px);
+      --card-h: calc(var(--card-w) * 1.34);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      min-height: 100vh;
+      margin: 0;
+      overflow-x: hidden;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      color: var(--ink);
+      background:
+        radial-gradient(circle at 16% 10%, rgba(197, 72, 70, 0.16), transparent 28%),
+        radial-gradient(circle at 82% 18%, rgba(122, 164, 184, 0.2), transparent 32%),
+        linear-gradient(135deg, #f9f6ef 0%, #ece9df 48%, #e2eadf 100%);
+    }
+
+    main {
+      display: grid;
+      grid-template-columns: minmax(260px, 0.85fr) minmax(320px, 1.15fr);
+      align-items: center;
+      gap: clamp(24px, 5vw, 72px);
+      width: min(1180px, calc(100vw - 32px));
+      min-height: 100vh;
+      margin: 0 auto;
+      padding: 36px 0;
+    }
+
+    .copy {
+      max-width: 430px;
+      user-select: none;
+    }
+
+    h1 {
+      margin: 0 0 16px;
+      font-family: Georgia, "Times New Roman", serif;
+      font-size: clamp(2.4rem, 6vw, 5.5rem);
+      font-weight: 500;
+      line-height: 0.92;
+      letter-spacing: -0.02em;
+    }
+
+    p {
+      max-width: 32rem;
+      margin: 0;
+      color: var(--muted);
+      font-size: clamp(1rem, 1.8vw, 1.15rem);
+      line-height: 1.7;
+    }
+
+    .counter {
+      display: inline-flex;
+      align-items: center;
+      min-height: 38px;
+      margin-top: 28px;
+      padding: 0 14px;
+      border: 1px solid rgba(23, 33, 31, 0.16);
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.42);
+      color: #36433f;
+      font-size: 0.88rem;
+      font-weight: 650;
+    }
+
+    .stage {
+      position: relative;
+      display: grid;
+      place-items: center;
+      min-height: min(720px, calc(100vh - 72px));
+      perspective: 1100px;
+      touch-action: manipulation;
+    }
+
+    .deck {
+      position: relative;
+      width: min(100%, calc(var(--card-w) + 130px));
+      height: min(78vh, calc(var(--card-h) + 140px));
+      min-height: 410px;
+      isolation: isolate;
+    }
+
+    .photo-card {
+      --x: 0px;
+      --y: 0px;
+      --r: 0deg;
+      --s: 1;
+      --float-x: 0px;
+      --float-y: -210px;
+      --float-r: 30deg;
+      --delay: 0ms;
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      width: var(--card-w);
+      height: var(--card-h);
+      padding: 10px 10px 44px;
+      border: 0;
+      border-radius: 8px;
+      background: #fffdf8;
+      box-shadow: 0 24px 55px rgba(35, 42, 40, 0.18), 0 4px 14px rgba(35, 42, 40, 0.12);
+      cursor: pointer;
+      transform: translate(-50%, -50%) translate3d(var(--x), var(--y), 0) rotate(var(--r)) scale(var(--s));
+      transition:
+        transform 650ms cubic-bezier(0.2, 0.9, 0.18, 1),
+        box-shadow 650ms ease,
+        filter 650ms ease,
+        opacity 400ms ease;
+      appearance: none;
+      -webkit-tap-highlight-color: transparent;
+      will-change: transform, opacity, filter;
+    }
+
+    /* Base card styling (always appears at the bottom) */
+    .photo-card.base-card {
+      cursor: default;
+      pointer-events: none;
+      transform: translate(-50%, -50%) translate3d(0px, 4px, 0) rotate(-2.5deg) scale(0.97);
+      box-shadow: 0 12px 32px rgba(35, 42, 40, 0.12);
+      z-index: 0 !important;
+    }
+
+    .photo-card.base-card::after {
+      content: ""; /* Replaced by a button element */
+    }
+
+    .redirect-button {
+      position: absolute;
+      bottom: 14px;
+      left: 50%;
+      transform: translateX(-50%);
+      padding: 8px 20px;
+      border-radius: 99px;
+      background: var(--accent);
+      color: var(--paper);
+      font-size: 0.9rem;
+      font-weight: 600;
+      text-decoration: none;
+      white-space: nowrap;
+      pointer-events: auto; /* Make it clickable on the disabled card */
+      cursor: pointer;
+      transition: transform 0.2s ease, background-color 0.2s ease;
+    }
+    .redirect-button:hover, .redirect-button:focus-visible {
+      background-color: #a53836; /* Darker accent */
+      transform: translateX(-50%) scale(1.05);
+    }
+    .photo-card:focus-visible {
+      outline: 4px solid rgba(197, 72, 70, 0.42);
+      outline-offset: 6px;
+    }
+
+    .photo-card img {
+      display: block;
+      width: 100%;
+      height: calc(100% - 34px);
+      object-fit: cover;
+      border-radius: 5px;
+      pointer-events: none;
+      user-select: none;
+    }
+
+    .photo-card::after {
+      content: attr(data-label);
+      position: absolute;
+      left: 17px;
+      right: 17px;
+      bottom: 14px;
+      overflow: hidden;
+      color: #51605a;
+      font-family: Georgia, "Times New Roman", serif;
+      font-size: 1.05rem;
+      line-height: 1.1;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .photo-card.is-selected {
+      --x: 0px !important;
+      --y: -18px !important;
+      --r: 0deg !important;
+      --s: 1.07 !important;
+      z-index: 200 !important;
+      box-shadow: 0 34px 70px rgba(22, 30, 28, 0.28), 0 10px 24px rgba(22, 30, 28, 0.18);
+      filter: saturate(1.04) contrast(1.02);
+    }
+
+    .photo-card.is-removing {
+      animation: petal-away 1900ms var(--delay) cubic-bezier(0.28, 0.02, 0.08, 1) forwards;
+      pointer-events: none;
+    }
+
+    .photo-card.is-removed {
+      display: none;
+    }
+
+    .petal {
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      width: clamp(12px, 2.2vw, 18px);
+      height: clamp(22px, 3.8vw, 34px);
+      border-radius: 100% 0 100% 0;
+      background: linear-gradient(150deg, rgba(255, 252, 246, 0.95), rgba(197, 72, 70, 0.5));
+      box-shadow: 0 8px 18px rgba(77, 58, 53, 0.12);
+      opacity: 0;
+      transform: translate(-50%, -50%) rotate(18deg);
+      pointer-events: none;
+      z-index: 250;
+    }
+
+    .petal.is-floating {
+      animation: petal-fragment 1800ms ease-out forwards;
+      animation-delay: var(--petal-delay, 0ms);
+    }
+
+    @keyframes petal-away {
+      0% {
+        opacity: 1;
+        filter: blur(0) saturate(1.04);
+        transform: translate(-50%, -50%) translate3d(0, -18px, 0) rotate(0deg) scale(1.07);
+      }
+      42% {
+        opacity: 0.88;
+        filter: blur(0.3px) saturate(1.03);
+        transform: translate(-50%, -50%) translate3d(calc(var(--float-x) * 0.34), -120px, 110px) rotate(calc(var(--float-r) * 0.36)) scale(1.02);
+      }
+      100% {
+        opacity: 0;
+        filter: blur(2.8px) saturate(0.92);
+        transform: translate(-50%, -50%) translate3d(var(--float-x), var(--float-y), 170px) rotate(var(--float-r)) scale(0.68);
+      }
+    }
+
+    @keyframes petal-fragment {
+      0% {
+        opacity: 0;
+        transform: translate(-50%, -50%) translate3d(0, 0, 0) rotate(0deg) scale(0.5);
+      }
+      15% {
+        opacity: 0.86;
+      }
+      100% {
+        opacity: 0;
+        transform: translate(-50%, -50%) translate3d(var(--petal-x), var(--petal-y), 0) rotate(var(--petal-r)) scale(1.08);
+      }
+    }
+
+    @media (max-width: 760px) {
+      body {
+        overflow-y: auto;
+      }
+
+      main {
+        grid-template-columns: 1fr;
+        align-content: start;
+        gap: 20px;
+        min-height: 100vh;
+        padding: 24px 16px 24px;
+      }
+
+      .copy {
+        max-width: none;
+        text-align: center;
+      }
+
+      p {
+        max-width: 36rem;
+        margin: 0 auto;
+      }
+
+      .counter {
+        margin-top: 14px;
+      }
+
+      .stage {
+        min-height: 480px;
+      }
+
+      .deck {
+        height: 460px;
+        min-height: 460px;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .photo-card,
+      .photo-card.is-removing,
+      .petal.is-floating {
+        animation-duration: 1ms;
+        transition-duration: 1ms;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <section class="copy" aria-label="Photo stack description">
+      <h1>The Fav 12</h1>
+      <p>Not in order...<br> Your Task in DONE!<br>RAMU KAKA</p>
+      <div class="counter" id="counter" aria-live="polite">12 most Favs in the stack</div>
+    </section>
+
+    <section class="stage" aria-label="Interactive photo stack">
+      <div class="deck" id="deck"></div>
+    </section>
+  </main>
+
+  <script>
+    const photos = [
+      { id: 1, label: "Family but Shubbu is most fav", url: "/assets/family.webp" },
+      { id: 2, label: "Fortuner Lover", url: "/assets/car.webp" },
+      { id: 3, label: "Cold Mountain Lover", url: "/assets/mount.webp" },
+      { id: 4, label: "Cricket watcher Badminton Player", url: "/assets/cric.webp" },
+      { id: 5, label: "Jab We Met", url: "/assets/movie.webp" },
+      { id: 6, label: "Public Bus Traveller", url: "/assets/travel.webp" },
+      { id: 7, label: "Love to Philanthropy", url: "/assets/kind.webp" },
+      { id: 8, label: "Sweets Lover", url: "/assets/sweet.webp" },
+      { id: 9, label: "Milkiez Candy Lover", url: "/assets/candy.webp" },
+      { id: 10, label: "Nick Jonas Pasand Hai", url: "/assets/nick.webp" },
+      { id: 11, label: "Ferris Wheel Lover", url: "/assets/wheel.webp" },
+      { id: 12, label: "Music Lover while Working", url: "/assets/song.webp" }
+    ];
+
+    const deck = document.querySelector("#deck");
+    const counter = document.querySelector("#counter");
+    
+    // Completely shuffle the 12 photos
+    const shuffled = [...photos].sort(() => Math.random() - 0.5);
+    let selectedId = null;
+    let topZ = 30;
+
+    // Helper to generate a random position offset and rotation for each card
+    function generateRandomPosition() {
+      const xRange = window.innerWidth < 760 ? 30 : 45;
+      const yRange = window.innerWidth < 760 ? 20 : 30;
+      
+      const x = Math.floor(Math.random() * (xRange * 2)) - xRange;
+      const y = Math.floor(Math.random() * (yRange * 2)) - yRange;
+      const r = Math.floor(Math.random() * 20) - 10; // Rotation between -10 and 10 degrees
+      return { x, y, r };
+    }
+
+    function renderStack() {
+      // 1. Create and render the permanent base card at the very bottom
+      const baseCard = document.createElement("div");
+      baseCard.className = "photo-card base-card";
+
+      const baseImage = document.createElement("img");
+      // A warm, minimal hand-drawn heart aesthetic image
+      baseImage.src = "/assets/last.webp";
+      baseImage.alt = "Memory background anchor";
+      baseImage.loading = "eager";
+
+      baseCard.append(baseImage);
+
+      const redirectButton = document.createElement("a");
+      redirectButton.href = "https://photos.app.goo.gl/iPaa15qrFccQhiT29";
+      redirectButton.className = "redirect-button";
+      redirectButton.textContent = "Go to Gallery";
+      redirectButton.setAttribute("aria-label", "Go to Gallery");
+      baseCard.append(redirectButton);
+
+      deck.append(baseCard);
+
+      // 2. Render the 12 shuffled, randomly positioned interactive photo cards
+      shuffled.forEach((photo, index) => {
+        const card = document.createElement("button");
+        const position = generateRandomPosition();
+        
+        card.className = "photo-card";
+        card.type = "button";
+        card.dataset.id = photo.id;
+        card.dataset.label = photo.label;
+        card.style.setProperty("--x", `${position.x}px`);
+        card.style.setProperty("--y", `${position.y}px`);
+        card.style.setProperty("--r", `${position.r}deg`);
+        card.style.zIndex = index + 1;
+        card.setAttribute("aria-label", `${photo.label}. Tap once to select, tap again to remove.`);
+
+        const image = document.createElement("img");
+        image.src = photo.url;
+        image.alt = photo.label;
+        image.loading = "eager";
+        image.decoding = "async";
+        card.append(image);
+
+        card.addEventListener("click", () => handleCardTap(card, photo.id));
+        deck.append(card);
+      });
+    }
+
+    function handleCardTap(card, id) {
+      if (card.classList.contains("is-removing")) return;
+
+      if (selectedId === id) {
+        removeCard(card);
+        selectedId = null;
+        return;
+      }
+
+      document.querySelectorAll(".photo-card.is-selected").forEach((selectedCard) => {
+        selectedCard.classList.remove("is-selected");
+      });
+
+      selectedId = id;
+      card.classList.add("is-selected");
+      card.style.zIndex = ++topZ;
+    }
+
+    function removeCard(card) {
+      card.disabled = true;
+      const direction = Math.random() > 0.5 ? 1 : -1;
+      const floatX = direction * (120 + Math.round(Math.random() * 90));
+      const floatY = -(230 + Math.round(Math.random() * 150));
+      const floatR = direction * (34 + Math.round(Math.random() * 26));
+
+      card.style.setProperty("--float-x", `${floatX}px`);
+      card.style.setProperty("--float-y", `${floatY}px`);
+      card.style.setProperty("--float-r", `${floatR}deg`);
+      card.classList.remove("is-selected");
+      card.classList.add("is-removing");
+      releasePetals(card);
+
+      card.addEventListener("animationend", () => {
+        card.classList.add("is-removed");
+        card.setAttribute("aria-hidden", "true");
+        card.tabIndex = -1;
+        updateCounter();
+      }, { once: true });
+    }
+
+    function releasePetals(card) {
+      const bounds = card.getBoundingClientRect();
+      const deckBounds = deck.getBoundingClientRect();
+      const centerX = bounds.left - deckBounds.left + bounds.width / 2;
+      const centerY = bounds.top - deckBounds.top + bounds.height / 2;
+
+      for (let index = 0; index < 10; index += 1) {
+        const petal = document.createElement("span");
+        const side = index % 2 === 0 ? -1 : 1;
+        const driftX = side * (60 + Math.random() * 170);
+        const driftY = -(100 + Math.random() * 260);
+        const rotate = side * (140 + Math.random() * 180);
+
+        petal.className = "petal is-floating";
+        petal.style.left = `${centerX + (Math.random() * 90 - 45)}px`;
+        petal.style.top = `${centerY + (Math.random() * 120 - 60)}px`;
+        petal.style.setProperty("--petal-x", `${driftX}px`);
+        petal.style.setProperty("--petal-y", `${driftY}px`);
+        petal.style.setProperty("--petal-r", `${rotate}deg`);
+        petal.style.setProperty("--petal-delay", `${index * 70}ms`);
+        deck.append(petal);
+        petal.addEventListener("animationend", () => petal.remove(), { once: true });
+      }
+    }
+
+    function updateCounter() {
+      // Exclude the base-card background element when checking remaining interactive count
+      const remaining = document.querySelectorAll(".photo-card:not(.is-removed):not(.base-card)").length;
+      counter.textContent = remaining === 0
+        ? "Happy Birthday again."
+        : `${remaining} ${remaining === 1 ? "photo" : "photos"} in the stack`;
+    }
+
+    renderStack();
+  </script>
+</body>
+</html>
