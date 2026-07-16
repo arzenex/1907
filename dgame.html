@@ -1,0 +1,972 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Inner Demons</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Fraunces:ital,wght@0,300;0,600;1,400&display=swap');
+
+  :root{
+    --bg: #08090b;
+    --bg-2: #101215;
+    --crimson: #b0202f;
+    --crimson-glow: #ff3b4e;
+    --ash: #7d8188;
+    --paper: #ece7de;
+  }
+
+  *{ margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color: transparent; user-select:none; }
+
+  html, body{
+    width:100%; height:100%;
+    background: var(--bg);
+    color: var(--paper);
+    font-family:'JetBrains Mono', monospace;
+    overflow:hidden;
+    touch-action:none;
+  }
+
+  .screen{
+    position:fixed; inset:0;
+    display:flex; flex-direction:column; align-items:center; justify-content:center;
+    gap:22px;
+    background:
+      radial-gradient(ellipse at 50% 0%, rgba(176,32,47,0.08), transparent 60%),
+      var(--bg);
+    text-align:center;
+    padding:24px;
+  }
+
+  .hidden{ display:none !important; }
+
+  .eyebrow{
+    font-size:11px; letter-spacing:0.35em; text-transform:uppercase;
+    color: var(--ash);
+  }
+
+  h1.title{
+    font-family:'Fraunces', serif;
+    font-weight:300; font-style:italic;
+    font-size: clamp(34px, 9vw, 58px);
+    color: var(--paper);
+    line-height:1.05;
+  }
+  h1.title em{
+    font-style:italic; font-weight:600; color: var(--crimson-glow);
+  }
+
+  .sub{
+    max-width:340px;
+    font-size:13px;
+    line-height:1.7;
+    color: var(--ash);
+  }
+
+  button{
+    font-family:'JetBrains Mono', monospace;
+    background: transparent;
+    border: 1px solid var(--crimson);
+    color: var(--paper);
+    padding: 14px 34px;
+    font-size: 12px;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: background 0.25s, color 0.25s, box-shadow 0.25s;
+  }
+  button:hover{
+    background: var(--crimson);
+    box-shadow: 0 0 24px rgba(255,59,78,0.35);
+  }
+  button:active{ transform: translateY(1px); }
+
+  /* ---------- GAME SCREEN ---------- */
+  #gameScreen{ display:none; }
+  #gameScreen.active{ display:block; }
+
+  #hud{
+    position:fixed; top:0; left:0; right:0;
+    display:flex; justify-content:space-between; align-items:center;
+    padding: 16px 20px;
+    font-size:11px; letter-spacing:0.15em; text-transform:uppercase;
+    color: var(--ash);
+    z-index:20;
+    background: linear-gradient(to bottom, rgba(8,9,11,0.9), transparent);
+  }
+  #hud .score span{ color: var(--paper); font-weight:700; }
+  #lives{ display:flex; gap:6px; }
+  .life-dot{
+    width:8px; height:8px; border-radius:50%;
+    background: var(--crimson-glow);
+    box-shadow: 0 0 6px var(--crimson-glow);
+  }
+  .life-dot.lost{ background:#2a2c30; box-shadow:none; }
+
+  #gameArea{
+    position:fixed; inset:0;
+    overflow:hidden;
+  }
+
+  .thought{
+    position:absolute;
+    top:-40px;
+    padding: 8px 16px 11px;
+    border:1px solid #2c2e33;
+    border-radius: 999px;
+    background: rgba(16,18,21,0.85);
+    backdrop-filter: blur(2px);
+    font-size: 12.5px;
+    color: var(--paper);
+    white-space:nowrap;
+    will-change: transform;
+    z-index:5;
+  }
+  .thought.struck{
+    color: var(--ash);
+    text-decoration: line-through;
+    text-decoration-color: var(--crimson-glow);
+    text-decoration-thickness: 2px;
+  }
+
+  .power-bar{
+    position:absolute;
+    left:8px; right:8px; bottom:4px;
+    height:2px;
+    background: rgba(255,255,255,0.08);
+    border-radius:2px;
+    overflow:hidden;
+    pointer-events:none;
+  }
+  .power-fill{
+    height:100%;
+    width:100%;
+    background: var(--crimson-glow);
+    box-shadow: 0 0 4px var(--crimson-glow);
+    transition: width 0.2s ease;
+  }
+
+  .thought.pulse{ animation: pulseHit 0.22s ease; }
+  @keyframes pulseHit{
+    0%{ transform: scale(1); }
+    40%{ transform: scale(0.9); }
+    100%{ transform: scale(1); }
+  }
+
+  .bullet{
+    position:absolute;
+    width:2px; height:26px;
+    transform: translateX(-50%);
+    background: linear-gradient(to top, var(--crimson-glow), transparent);
+    box-shadow: 0 0 8px var(--crimson-glow);
+    z-index:6;
+  }
+
+  .bullet-word{
+    position:absolute;
+    transform: translateX(-50%);
+    padding: 4px 11px;
+    border-radius: 999px;
+    border: 1px solid var(--crimson-glow);
+    background: rgba(176,32,47,0.18);
+    color: var(--paper);
+    font-size: 10px;
+    letter-spacing: 0.02em;
+    white-space: nowrap;
+    box-shadow: 0 0 10px rgba(255,59,78,0.35);
+    z-index:6;
+  }
+
+  #gun{
+    position:absolute;
+    bottom: 60px;
+    width:2px; height:34px;
+    background: var(--paper);
+    box-shadow: 0 0 10px rgba(236,231,222,0.6);
+    z-index:10;
+  }
+  #gunName{
+    position:absolute;
+    bottom: 100px;
+    transform: translateX(-50%);
+    font-size:10px;
+    letter-spacing:0.2em;
+    text-transform:uppercase;
+    color: var(--crimson-glow);
+    white-space:nowrap;
+    z-index:10;
+  }
+  #gunName.is-photo{
+    bottom: 96px;
+    width:46px; height:46px;
+    border-radius:50%;
+    overflow:hidden;
+    border:1px solid var(--crimson-glow);
+    box-shadow: 0 0 14px rgba(255,59,78,0.4);
+  }
+  #gunName.is-photo img{
+    width:100%; height:100%; object-fit:cover; display:block;
+  }
+
+  .thought.photo-thought{
+    padding:0;
+    width:74px; height:78px;
+    border:0;
+    border-radius:0;
+    overflow:visible;
+    background:none;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    gap:4px;
+  }
+  .photo-frame{
+    position:relative;
+    width:52px; height:52px;
+    border-radius:50%;
+    overflow:hidden;
+    border:1px solid #2c2e33;
+    background: rgba(16,18,21,0.85);
+  }
+  .thought.photo-thought img{
+    width:100%; height:100%; object-fit:cover; display:block;
+    filter: grayscale(15%);
+  }
+  .photo-label{
+    max-width:74px;
+    padding:2px 6px;
+    border:1px solid rgba(255,59,78,0.45);
+    border-radius:999px;
+    background: rgba(8,9,11,0.86);
+    color: var(--paper);
+    font-size:9px;
+    line-height:1.2;
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
+    text-transform:uppercase;
+  }
+  .thought.photo-thought.struck img{
+    filter: grayscale(100%) brightness(0.6);
+  }
+  .thought.photo-thought.struck .photo-frame::after{
+    content:"";
+    position:absolute; left:11px; right:11px; top:26px;
+    height:2px; background: var(--crimson-glow);
+    transform: rotate(-12deg);
+  }
+
+  #baseline{
+    position:fixed; bottom:56px; left:0; right:0;
+    height:1px;
+    background: #1c1e22;
+    z-index:4;
+  }
+
+  .flash{
+    position:fixed; inset:0;
+    background: var(--crimson);
+    opacity:0;
+    pointer-events:none;
+    z-index:15;
+  }
+
+  #endScreen p.result{
+    font-size:12px; color: var(--ash); letter-spacing:0.1em;
+  }
+
+  #courtSequenceScreen.case-file{
+    background:
+      linear-gradient(rgba(8,9,11,0.82), rgba(8,9,11,0.9)),
+      repeating-linear-gradient(0deg, rgba(236,231,222,0.04) 0 1px, transparent 1px 15px),
+      radial-gradient(ellipse at 50% 15%, rgba(176,32,47,0.18), transparent 54%),
+      var(--bg);
+  }
+  #courtSequenceScreen.case-file::before{
+    content:"CASE FILE";
+    position:absolute;
+    top:22px; left:22px;
+    color: rgba(236,231,222,0.28);
+    font-size:11px;
+    letter-spacing:0.32em;
+  }
+  #courtSequenceScreen.case-file::after{
+    content:"CONFIDENTIAL";
+    position:absolute;
+    right:-30px; bottom:54px;
+    transform: rotate(-18deg);
+    color: rgba(255,59,78,0.12);
+    border:2px solid rgba(255,59,78,0.16);
+    padding:12px 18px;
+    font-size:22px;
+    letter-spacing:0.18em;
+  }
+  #courtStamp{
+    border:2px solid var(--crimson-glow);
+    color: var(--crimson-glow);
+    padding:8px 16px;
+    font-size:20px;
+    font-weight:700;
+    letter-spacing:0.16em;
+    text-transform:uppercase;
+    transform: rotate(-8deg);
+    box-shadow: 0 0 18px rgba(255,59,78,0.22);
+  }
+  #courtSequenceScreen.shake{
+    animation: courtShake 0.28s linear;
+  }
+  @keyframes courtShake{
+    0%,100%{ transform: translate(0,0); }
+    20%{ transform: translate(-5px,2px); }
+    40%{ transform: translate(4px,-2px); }
+    60%{ transform: translate(-3px,-1px); }
+    80%{ transform: translate(3px,1px); }
+  }
+
+  .stack{ display:flex; flex-direction:column; gap:14px; align-items:center; }
+
+  @media (prefers-reduced-motion: reduce){
+    * { transition: none !important; }
+  }
+</style>
+</head>
+<body>
+
+  <!-- START SCREEN -->
+  <div class="screen" id="startScreen">
+    <div class="eyebrow">a small  task</div>
+    <h1 class="title">after this<br><em>YOUR FAV 12</em><br> will appear</h1>
+    <p class="sub">....</p>
+    <div class="stack">
+      <button id="startBtn">Begin</button>
+    </div>
+    <p class="sub" style="font-size:11px;">Move: drag / arrow keys &nbsp;·&nbsp; Shoot: tap / space</p>
+  </div>
+
+  <!-- GAME SCREEN -->
+  <div class="screen" id="gameScreen" style="padding:0;">
+    <div id="hud">
+      <div class="score">SHOT DOWN <span id="scoreVal">0</span> / <span id="targetVal">15</span></div>
+      <div id="lives"></div>
+    </div>
+    <div id="baseline"></div>
+    <div id="gameArea">
+      <div id="gunName">YOU</div>
+      <div id="gun"></div>
+    </div>
+  </div>
+
+  <div class="flash" id="flash"></div>
+
+  <!-- END SCREEN -->
+  <div class="screen hidden" id="endScreen">
+    <div class="eyebrow" id="endEyebrow">quiet, finally</div>
+    <h1 class="title" id="endTitle">The noise<br><em>settles.</em></h1>
+    <p class="sub result" id="endResult"></p>
+    <div class="stack">
+      <button id="continueBtn">Continue</button>
+      <button id="retryBtn" style="border-color:#2a2c30;">Retry</button>
+    </div>
+  </div>
+
+  <!-- COURT SEQUENCE SCREEN -->
+  <div class="screen hidden" id="courtSequenceScreen">
+    <h1 class="title" id="courtTitle"></h1>
+    <div id="courtStamp" class="hidden">Found Guilty</div>
+    <p class="sub" id="courtMessage"></p>
+    <p class="sub hidden" id="courtTimerLabel"></p>
+    <div id="courtTimer" class="hidden" style="font-size: 48px; color: var(--crimson-glow);"></div>
+    <div class="stack">
+      <button id="nextPhaseBtn" class="hidden">Move to Next Phase</button>
+    </div>
+  </div>
+
+<script>
+(function(){
+  // ---------------- CONFIG ----------------
+  const NEXT_PAGE_URL = "fav.html"; // <-- change this to wherever "next page" should go
+  const WIN_TARGET   = 20;   // thoughts to shoot down to win
+  const START_LIVES  = 1;    // one missed demon means retry
+  const MAX_ACTIVE_THOUGHTS = 2; // only this many demons on screen at once
+  const PHOTO_THOUGHT_HITS = 3; // Number of hits to take down a photo thought
+  const SHOT_COOLDOWN_MS = 350;  // min gap between shots — keeps it deliberate, not spammy
+  const SPAWN_MS_START = 2200; // ms between spawns at start
+  const SPAWN_MS_MIN   = 1400; // fastest spawn rate reached
+  const FALL_SPEED_START = 0.4; // px per frame — slow, so both demon text and bullet chunks stay readable
+  const FALL_SPEED_MAX   = 0.9;
+
+  // Prefilled dummy identity — swap these two for a specific person later
+  const PLAYER_NAME = "YOU";
+  const PLAYER_PHOTO_URL = "charimg/rk.webp"; // <-- replace with real photo URL/path later
+
+  // Dummy demon photo(s) — add more URLs here later, one specific person per entry
+  const DEMON_PHOTOS = [
+    "charimg/py.webp",
+    "charimg/anu.webp",
+    "charimg/salu.webp"
+  ];
+  const DEMON_PHOTO_LABELS = {
+    "charimg/py.webp": "Priyanka",
+    "charimg/anu.webp": "Bhaujai",
+    "charimg/salu.webp": "Salu"
+  };
+
+  // Each demon thought has its own comeback, broken into short chunks.
+  // Shooting fires ONE chunk at a time (not the whole line as a single bullet) so it stays readable.
+  const THOUGHTS = [
+    { text: "Are Dulha",            counter: ["WOW", "So Handsom", "very Handsome", "😍😍"] },
+    { text: "Salu Ke Bare Me",            counter: [" 😒😒", "usi", "se puxxo"] },
+    { text: "Switzerland Jana Hai",           counter: ["Pahle", "corruption", "Kr lu"] },
+    { text: "SDM banne Ke bad",      counter: ["isko Jail me", "usko jail me", "sab ko jail me"," dal dungi"] },
+    { text: "Shadi Ka lenga",        counter: ["HA delhi se", "hi lungi"] },
+    { text: "Gulab Jamun",                 counter: ["sab ka kha ", "Jaungi","❤️","😋"] },
+   
+    { text: "12 Fav",       counter: ["ise par karo", "khul gya wo ab","bs ese par kr lo"] },
+    { text: "Ramu Kaka",       counter: ["mai hu", "mai hu","mai hi hu","sach me"] },
+    { text: "Divya",    counter: ["isme to", "kuxx hai hi na","chahe dekh","lena🤣"] },
+    { text: "Task de rhi ho",     counter: ["🤣🤣", "ho gya ","ab tum karo"] },
+    { text: "So jana jaldi",        counter: ["nhi nhi", "abhi to neend ", "puri  hui hai"] },
+   
+    { text: "o Ramu Kaka",              counter: ["Happy B'day", "Happy B'day", "Happy B'day", "Happy B'day",  ] },
+    
+  ];
+
+  // ---------------- STATE ----------------
+  let playerName = PLAYER_NAME;
+  let playerPhoto = PLAYER_PHOTO_URL;
+  let demonPhotos = DEMON_PHOTOS.slice();
+  let score = 0;
+  let lives = START_LIVES;
+  let running = false;
+  let gunX = window.innerWidth / 2;
+  let gunTagWidth = 40;       // updates to match name/photo tag width, keeps it on-screen
+  let spawnTimer = null;
+  let rafId = null;
+  let elapsedMs = 0;
+  let lastKilledPhoto = null;
+  let lastShotAt = 0;
+  let firstPassSpawnQueue = [];
+  let audioCtx = null;
+  let thoughts = []; // {el, x, y, speed, w, text, counter, power, maxPower, dead}
+  let bullets = [];  // {el, x, y, w, target}
+
+  // ---------------- DOM ----------------
+  const startScreen = document.getElementById('startScreen');
+  const gameScreen  = document.getElementById('gameScreen');
+  const endScreen   = document.getElementById('endScreen');
+  const startBtn    = document.getElementById('startBtn');
+  const retryBtn    = document.getElementById('retryBtn');
+  const continueBtn = document.getElementById('continueBtn');
+  const gameArea    = document.getElementById('gameArea');
+  const gun         = document.getElementById('gun');
+  const gunNameEl   = document.getElementById('gunName');
+  const scoreVal    = document.getElementById('scoreVal');
+  const targetVal   = document.getElementById('targetVal');
+  const livesWrap   = document.getElementById('lives');
+  const flashEl     = document.getElementById('flash');
+  const endEyebrow  = document.getElementById('endEyebrow');
+  const endTitle    = document.getElementById('endTitle');
+  const endResult   = document.getElementById('endResult');
+  const courtSequenceScreen = document.getElementById('courtSequenceScreen');
+  const nextPhaseBtn = document.getElementById('nextPhaseBtn');
+  const courtTimerLabel = document.getElementById('courtTimerLabel');
+  const courtStamp = document.getElementById('courtStamp');
+
+  targetVal.textContent = WIN_TARGET;
+
+  function buildLives(){
+    livesWrap.textContent = "MISS = RETRY";
+  }
+
+  function updateLives(){
+    livesWrap.textContent = "MISS = RETRY";
+  }
+
+  function flash(){
+    flashEl.style.transition = 'none';
+    flashEl.style.opacity = '0.35';
+    requestAnimationFrame(() => {
+      flashEl.style.transition = 'opacity 0.3s ease';
+      flashEl.style.opacity = '0';
+    });
+  }
+
+  function initAudio(){
+    if(audioCtx) return;
+    const AudioContext = window.AudioContext || window.webkitAudioContext;
+    if(AudioContext) audioCtx = new AudioContext();
+  }
+
+  function playTone(freq, duration, type = 'sine', volume = 0.05){
+    if(!audioCtx) return;
+    const osc = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
+    osc.type = type;
+    osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+    gain.gain.setValueAtTime(volume, audioCtx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + duration);
+    osc.connect(gain);
+    gain.connect(audioCtx.destination);
+    osc.start();
+    osc.stop(audioCtx.currentTime + duration);
+  }
+
+  function playShootSound(){ playTone(760, 0.06, 'square', 0.035); }
+  function playHitSound(){ playTone(180, 0.08, 'sawtooth', 0.04); }
+  function playStampSound(){
+    playTone(90, 0.18, 'square', 0.08);
+    setTimeout(() => playTone(55, 0.12, 'sawtooth', 0.05), 80);
+  }
+  function playTickSound(){ playTone(980, 0.035, 'square', 0.025); }
+  function playBailSound(){
+    playTone(420, 0.08, 'sine', 0.04);
+    setTimeout(() => playTone(640, 0.12, 'sine', 0.045), 90);
+  }
+
+  function shakeCourt(){
+    courtSequenceScreen.classList.remove('shake');
+    void courtSequenceScreen.offsetWidth;
+    courtSequenceScreen.classList.add('shake');
+  }
+
+  function getPhotoLabel(url){
+    return DEMON_PHOTO_LABELS[url] || "Demon";
+  }
+
+  // ---------------- GUN MOVEMENT ----------------
+  function applyPlayerTag(){
+    if(playerPhoto){
+      gunNameEl.classList.add('is-photo');
+      gunNameEl.innerHTML = `<img src="${playerPhoto}" alt="${playerName}">`;
+      gunTagWidth = 46;
+    } else {
+      gunNameEl.classList.remove('is-photo');
+      gunNameEl.textContent = playerName.toUpperCase();
+      gunTagWidth = Math.max(40, gunNameEl.offsetWidth || 60);
+    }
+  }
+
+  function setGunX(x){
+    // margin accounts for the name/photo tag width so it never clips off the sides
+    const margin = Math.max(20, gunTagWidth / 2 + 8);
+    gunX = Math.max(margin, Math.min(window.innerWidth - margin, x));
+    gun.style.left = gunX + 'px';
+    gunNameEl.style.left = gunX + 'px';
+  }
+
+  let pointerDownAt = null, pointerDownX = 0, pointerDownY = 0, pointerMoved = false;
+  const TAP_MOVE_THRESHOLD = 12; // px — beyond this, a touch counts as a drag/scroll, not a tap
+
+  gameArea.addEventListener('pointermove', (e) => {
+    if(!running) return;
+    setGunX(e.clientX);
+    if(pointerDownAt){
+      const dx = Math.abs(e.clientX - pointerDownX);
+      const dy = Math.abs(e.clientY - pointerDownY);
+      if(dx > TAP_MOVE_THRESHOLD || dy > TAP_MOVE_THRESHOLD) pointerMoved = true;
+    }
+  });
+
+  gameArea.addEventListener('pointerdown', (e) => {
+    if(!running) return;
+    pointerDownAt = Date.now();
+    pointerDownX = e.clientX;
+    pointerDownY = e.clientY;
+    pointerMoved = false;
+    setGunX(e.clientX);
+  });
+
+  gameArea.addEventListener('pointerup', (e) => {
+    if(!running) return;
+    if(!pointerMoved) shoot(); // only a real tap fires — dragging to move/scroll never does
+    pointerDownAt = null;
+  });
+
+  gameArea.addEventListener('pointercancel', () => { pointerDownAt = null; pointerMoved = false; });
+
+  document.addEventListener('keydown', (e) => {
+    if(!running) return;
+    if(e.code === 'ArrowLeft') setGunX(gunX - 28);
+    if(e.code === 'ArrowRight') setGunX(gunX + 28);
+    if(e.code === 'Space'){ e.preventDefault(); shoot(); }
+  });
+
+  // ---------------- SHOOTING ----------------
+  function shoot(){
+    const now = Date.now();
+    if(now - lastShotAt < SHOT_COOLDOWN_MS) return; // deliberate pacing, no button-mash spam
+    lastShotAt = now;
+    playShootSound();
+
+    // find the nearest thought to the gun's current lane — this bullet is locked to THIS target only
+    let nearest = null, minDist = Infinity;
+    thoughts.forEach(t => {
+      const dist = Math.abs((t.x + t.w / 2) - gunX);
+      if(dist < minDist){ minDist = dist; nearest = t; }
+    });
+
+    const gameH = window.innerHeight;
+    const startY = gameH - 96;
+
+    if(nearest && nearest.counter){
+      // word-bullet — reveals the NEXT chunk in order, based on hits already landed
+      const idx = Math.min(nearest.maxPower - nearest.power, nearest.counter.length - 1);
+      const chunk = nearest.counter[idx];
+      const el = document.createElement('div');
+      el.className = 'bullet-word';
+      el.textContent = chunk;
+      el.style.left = gunX + 'px';
+      el.style.top = startY + 'px';
+      gameArea.appendChild(el);
+      bullets.push({ el, x: gunX, y: startY, w: el.offsetWidth || 60, target: nearest });
+    } else {
+      // plain tracer — used when no target yet, or nearest target is a photo
+      const el = document.createElement('div');
+      el.className = 'bullet';
+      el.style.left = gunX + 'px';
+      el.style.top = startY + 'px';
+      gameArea.appendChild(el);
+      bullets.push({ el, x: gunX, y: startY, w: 2, target: nearest || null });
+    }
+  }
+
+  // ---------------- SPAWNING ----------------
+  function shuffled(items){
+    const copy = items.slice();
+    for(let i = copy.length - 1; i > 0; i--){
+      const j = Math.floor(Math.random() * (i + 1));
+      [copy[i], copy[j]] = [copy[j], copy[i]];
+    }
+    return copy;
+  }
+
+  function buildFirstPassSpawnQueue(){
+    const textEntries = THOUGHTS.map(item => ({ type: 'text', item }));
+    const photoEntries = demonPhotos.map(url => ({ type: 'photo', url }));
+    firstPassSpawnQueue = shuffled(textEntries.concat(photoEntries));
+  }
+
+  function pickSpawnEntry(){
+    if(firstPassSpawnQueue.length > 0){
+      return firstPassSpawnQueue.shift();
+    }
+
+    const usePhoto = demonPhotos.length > 0 && Math.random() < 0.35;
+    if(usePhoto){
+      return {
+        type: 'photo',
+        url: demonPhotos[Math.floor(Math.random() * demonPhotos.length)]
+      };
+    }
+
+    return {
+      type: 'text',
+      item: THOUGHTS[Math.floor(Math.random() * THOUGHTS.length)]
+    };
+  }
+
+  function spawnThought(){
+    const spawnEntry = pickSpawnEntry();
+    const usePhoto = spawnEntry.type === 'photo';
+    const el = document.createElement('div');
+    el.className = 'thought';
+
+    let elWidth, text = null, counter = null, powerFillEl = null, maxPower, url = null;
+
+    if(usePhoto){
+      el.classList.add('photo-thought');
+      url = spawnEntry.url;
+      el.innerHTML = `<div class="photo-frame"><img src="${url}" alt="${getPhotoLabel(url)}"></div><div class="photo-label">${getPhotoLabel(url)}</div>`;
+      elWidth = 74;
+      maxPower = PHOTO_THOUGHT_HITS;
+    } else {
+      const item = spawnEntry.item;
+      text = item.text;
+      counter = item.counter;
+      el.textContent = text;
+      maxPower = counter.length;
+    }
+
+    // Add a power bar if it takes more than one hit to defeat.
+    if (maxPower > 1) {
+      const bar = document.createElement('div');
+      bar.className = 'power-bar';
+      const fill = document.createElement('div');
+      fill.className = 'power-fill';
+      bar.appendChild(fill);
+      el.appendChild(bar);
+      powerFillEl = fill;
+    }
+
+    gameArea.appendChild(el);
+    if(!usePhoto) elWidth = el.offsetWidth || 140;
+
+    const w = window.innerWidth;
+    const x = Math.random() * (w - elWidth - 24) + 12;
+    el.style.left = x + 'px';
+    el.style.top = '-40px';
+
+    const progress = Math.min(elapsedMs / 60000, 1);
+    const speed = FALL_SPEED_START + (FALL_SPEED_MAX - FALL_SPEED_START) * progress;
+
+    thoughts.push({ el, x, y: -40, speed, w: elWidth, text, counter, powerFillEl, power: maxPower, maxPower, dead: false, url });
+  }
+
+  function scheduleSpawn(){
+    if(!running) return;
+    if(thoughts.length < MAX_ACTIVE_THOUGHTS){
+      spawnThought();
+    }
+    const progress = Math.min(elapsedMs / 60000, 1);
+    const normalInterval = SPAWN_MS_START - (SPAWN_MS_START - SPAWN_MS_MIN) * progress;
+    // if we're already at capacity, check back soon rather than waiting the full interval
+    const interval = thoughts.length >= MAX_ACTIVE_THOUGHTS ? 300 : normalInterval;
+    spawnTimer = setTimeout(scheduleSpawn, interval);
+  }
+
+  // ---------------- GAME LOOP ----------------
+  let lastTs = null;
+  function loop(ts){
+    if(!running) return;
+    if(lastTs === null) lastTs = ts;
+    const dt = ts - lastTs;
+    lastTs = ts;
+    elapsedMs += dt;
+
+    // move bullets
+    for(let i = bullets.length - 1; i >= 0; i--){
+      const b = bullets[i];
+      b.y -= 4;
+      if(b.y < -30){
+        b.el.remove();
+        bullets.splice(i, 1);
+        continue;
+      }
+      b.el.style.top = b.y + 'px';
+    }
+
+    // move thoughts
+    const floorY = window.innerHeight - 60;
+    for(let i = thoughts.length - 1; i >= 0; i--){
+      const t = thoughts[i];
+      t.y += t.speed * (dt / 16.6);
+      t.el.style.top = t.y + 'px';
+
+      if(t.y >= floorY){
+        // Any skipped demon means retry.
+        t.dead = true;
+        t.el.remove();
+        thoughts.splice(i, 1);
+        flash();
+        endGame(false);
+        return;
+      }
+    }
+
+    // collisions — each bullet can only affect the specific villain it was fired at
+    for(let i = bullets.length - 1; i >= 0; i--){
+      const b = bullets[i];
+      const t = b.target;
+      if(!t || t.dead) continue; // no target, or it was already finished off by an earlier bullet
+
+      const tHeight = t.el.classList.contains('photo-thought') ? 78 : 34;
+      const tTop = t.y, tBottom = t.y + tHeight;
+      const tLeft = t.x, tRight = t.x + t.w;
+      const bLeft = b.x - (b.w || 2) / 2, bRight = b.x + (b.w || 2) / 2;
+
+      if(b.y >= tTop && b.y <= tBottom && bRight >= tLeft && bLeft <= tRight){
+        // landed a hit — chip away at its power
+        b.el.remove();
+        bullets.splice(i, 1);
+        playHitSound();
+        t.power -= 1;
+        if(t.powerFillEl){
+          t.powerFillEl.style.width = Math.max(0, (t.power / t.maxPower) * 100) + '%';
+        }
+
+        if(t.power <= 0){
+          // fully countered — it vanishes
+          t.dead = true;
+          t.el.classList.add('struck');
+          if (t.url) {
+            lastKilledPhoto = t.url;
+          }
+          score += 1;
+          scoreVal.textContent = score;
+          setTimeout(() => {
+            t.el.style.transition = 'opacity 0.35s ease, transform 0.35s ease';
+            t.el.style.opacity = '0';
+            t.el.style.transform = 'scale(0.85)';
+            setTimeout(() => t.el.remove(), 360);
+          }, 220);
+          const idx = thoughts.indexOf(t);
+          if(idx > -1) thoughts.splice(idx, 1);
+          if(score >= WIN_TARGET){
+            endGame(true);
+            return;
+          }
+        } else {
+          // still standing, but weakened — quick pulse feedback
+          t.el.classList.remove('pulse');
+          void t.el.offsetWidth; // restart the animation
+          t.el.classList.add('pulse');
+        }
+      }
+    }
+
+    rafId = requestAnimationFrame(loop);
+  }
+
+  // ---------------- COURT SEQUENCE ----------------
+  async function startCourtSequence() {
+    gameScreen.classList.remove('active');
+    startScreen.classList.add('hidden');
+    endScreen.classList.add('hidden');
+    courtSequenceScreen.classList.remove('hidden');
+    courtSequenceScreen.classList.add('case-file');
+
+    const courtTitle = document.getElementById('courtTitle');
+    const courtMessage = document.getElementById('courtMessage');
+    const courtTimerEl = document.getElementById('courtTimer');
+
+    const wait = (ms) => new Promise(resolve => setTimeout(resolve, ms));
+
+    // Reset elements
+    courtTimerEl.classList.add('hidden');
+    courtTimerLabel.classList.add('hidden');
+    courtStamp.classList.add('hidden');
+    nextPhaseBtn.classList.add('hidden');
+    courtTitle.innerHTML = "";
+    courtMessage.textContent = "";
+
+    await wait(1000);
+    courtTitle.innerHTML = "FIR Launched";
+    courtMessage.textContent = "FIR launched against u.";
+
+    await wait(2500);
+    courtTitle.innerHTML = "Investigation";
+    courtMessage.textContent = "Investigation under processing.";
+
+    await wait(2500);
+    courtTitle.innerHTML = "Evidence Collected";
+    courtMessage.textContent = "Evidence collected...";
+
+    await wait(1700);
+    playStampSound();
+    shakeCourt();
+    courtTitle.innerHTML = "Found Guilty";
+    courtStamp.classList.remove('hidden');
+    courtMessage.textContent = "Found guilty for harming Bhaujai, Salu, Priyanka. Case moved to court.";
+
+    await wait(2500);
+    courtTitle.innerHTML = "Verdict Pending";
+    courtStamp.classList.add('hidden');
+    courtMessage.textContent = "";
+    courtTimerLabel.textContent = "Decision in 60 sec";
+    courtTimerLabel.classList.remove('hidden');
+    courtTimerEl.classList.remove('hidden');
+    
+    let timeLeft = 60;
+    courtTimerEl.textContent = timeLeft;
+
+    await new Promise(resolve => {
+        const timerInterval = setInterval(() => {
+            timeLeft--;
+            courtTimerEl.textContent = timeLeft;
+            playTickSound();
+            if (timeLeft <= 48) {
+                clearInterval(timerInterval);
+                resolve();
+            }
+        }, 1000);
+    });
+
+    courtTimerEl.classList.add('hidden');
+    courtTimerLabel.classList.add('hidden');
+    playBailSound();
+    shakeCourt();
+    courtTitle.innerHTML = "BAIL GRANTED";
+    courtMessage.textContent = "Difficult effort from Kamla bahan got u bail... moving next part.";
+
+    await wait(1500);
+    nextPhaseBtn.textContent = "Continue";
+    nextPhaseBtn.classList.remove('hidden');
+  }
+
+  // ---------------- FLOW ----------------
+  function startGame(){
+    initAudio();
+    if(audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
+    playerName = PLAYER_NAME;
+    applyPlayerTag();
+    score = 0; lives = START_LIVES; elapsedMs = 0; lastKilledPhoto = null;
+    buildFirstPassSpawnQueue();
+    scoreVal.textContent = 0;
+    buildLives();
+    thoughts.forEach(t => t.el.remove());
+    bullets.forEach(b => b.el.remove());
+    thoughts = []; bullets = [];
+
+    startScreen.classList.add('hidden');
+    endScreen.classList.add('hidden');
+    courtSequenceScreen.classList.add('hidden');
+    courtSequenceScreen.classList.remove('case-file', 'shake');
+    gameScreen.classList.add('active');
+
+    setGunX(window.innerWidth / 2);
+    running = true;
+    lastTs = null;
+    rafId = requestAnimationFrame(loop);
+    scheduleSpawn();
+  }
+
+  function endGame(won){
+    running = false;
+    clearTimeout(spawnTimer);
+    cancelAnimationFrame(rafId);
+
+    // After the game is finished, show the court sequence before moving to fav.html.
+    if (won) {
+      startCourtSequence();
+      return;
+    }
+
+    gameScreen.classList.remove('active');
+    endScreen.classList.remove('hidden');
+
+    let customMessage = "";
+    if (lastKilledPhoto) {
+      if (lastKilledPhoto.includes('anu.webp')) {
+        customMessage = "<br>You have harmed Bhaujai.";
+      } else if (lastKilledPhoto.includes('salu.webp')) {
+        customMessage = "<br>You have harmed Shalu Bhalu.";
+      } else if (lastKilledPhoto.includes('py.webp')) {
+        customMessage = "<br>You have harmed Priyanka.";
+      }
+    }
+
+    if(won){
+      endEyebrow.textContent = "Lets move next";
+      endTitle.innerHTML = ".</em>";
+      endResult.innerHTML = `${playerName.toUpperCase()} · ${score} .` + customMessage;
+      continueBtn.classList.remove('hidden');
+    } else {
+      endResult.innerHTML = `${playerName.toUpperCase()} · silenced ${score} of ${WIN_TARGET}.` + customMessage;
+      endEyebrow.textContent = "missed demon";
+      endTitle.innerHTML = "Retry";
+      endResult.innerHTML = "Do not skip any demon image or demon text." + customMessage;
+      continueBtn.classList.add('hidden');
+    }
+  }
+
+  startBtn.addEventListener('click', startGame);
+  retryBtn.addEventListener('click', startGame);
+  nextPhaseBtn.addEventListener('click', () => { window.location.href = NEXT_PAGE_URL; });
+  continueBtn.addEventListener('click', () => { window.location.href = NEXT_PAGE_URL; });
+
+  window.addEventListener('resize', () => { setGunX(gunX); });
+
+})();
+</script>
+</body>
+</html>
