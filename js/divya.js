@@ -115,7 +115,7 @@ function handleMotion(e){
         // Continuous decay loop so the bar drops if they stop moving/clicking
         let decayInt = setInterval(() => {
             if (state === "LIT" && !finalStage) {
-                progress = Math.max(0, progress - 2.5); // Tune this to make it harder or easier
+                progress = Math.max(0, progress - 1.5); // Tune this to make it harder or easier
                 updateUI();
             } else if (finalStage) {
                 clearInterval(decayInt);
