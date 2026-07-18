@@ -360,8 +360,8 @@
 
   <!-- END SCREEN -->
   <div class="screen hidden" id="endScreen">
-    <div class="eyebrow" id="endEyebrow">quiet, finally</div>
-    <h1 class="title" id="endTitle">The noise<br><em>settles.</em></h1>
+    <div class="eyebrow" id="endEyebrow">..</div>
+    <h1 class="title" id="endTitle">.<br><em>.</em></h1>
     <p class="sub result" id="endResult"></p>
     <div class="stack">
       <button id="continueBtn">Continue</button>
@@ -406,9 +406,9 @@
     "charimg/salu.webp"
   ];
   const DEMON_PHOTO_LABELS = {
-    "charimg/py.webp": "Priyanka",
-    "charimg/anu.webp": "Bhaujai",
-    "charimg/salu.webp": "Salu"
+    "charimg/py.webp": "Priyanka C.J.",  
+    "charimg/anu.webp": "Dogmatic",
+    "charimg/salu.webp": "Cruel Bear"
   };
 
   // Each demon thought has its own comeback, broken into short chunks.
@@ -423,7 +423,6 @@
    
     { text: "12 Fav",       counter: ["ise par karo", "khul gya wo ab","bs ese par kr lo"] },
     { text: "Ramu Kaka",       counter: ["mai hu", "mai hu","mai hi hu","sach me"] },
-    { text: "Divya",    counter: ["isme to", "kuxx hai hi na","chahe dekh","lena🤣"] },
     { text: "Task de rhi ho",     counter: ["🤣🤣", "ho gya ","ab tum karo"] },
     { text: "So jana jaldi",        counter: ["nhi nhi", "abhi to neend ", "puri  hui hai"] },
    
@@ -841,11 +840,11 @@
 
     await wait(1000);
     courtTitle.innerHTML = "FIR Launched";
-    courtMessage.textContent = "FIR launched against u.";
+    courtMessage.textContent = "FIR launched against You, Ramu Kaka.";
 
     await wait(2500);
     courtTitle.innerHTML = "Investigation";
-    courtMessage.textContent = "Investigation under processing.";
+    courtMessage.textContent = "Authorities are investigating the matter..";
 
     await wait(2500);
     courtTitle.innerHTML = "Evidence Collected";
@@ -856,13 +855,13 @@
     shakeCourt();
     courtTitle.innerHTML = "Found Guilty";
     courtStamp.classList.remove('hidden');
-    courtMessage.textContent = "Found guilty for harming Bhaujai, Salu, Priyanka. Case moved to court.";
+    courtMessage.textContent = "Found guilty of harming Saurabh, Salu, and Nick Jonas's Wife. The case has been moved to court.";
 
     await wait(2500);
     courtTitle.innerHTML = "Verdict Pending";
     courtStamp.classList.add('hidden');
     courtMessage.textContent = "";
-    courtTimerLabel.textContent = "Decision in 60 sec";
+    courtTimerLabel.textContent = "Court's final judgment in 60 seconds.";
     courtTimerLabel.classList.remove('hidden');
     courtTimerEl.classList.remove('hidden');
     
@@ -886,7 +885,7 @@
     playBailSound();
     shakeCourt();
     courtTitle.innerHTML = "BAIL GRANTED";
-    courtMessage.textContent = "Difficult effort from Kamla bahan got u bail... moving next part.";
+    courtMessage.textContent = "Thanks to Kamla Behan's tireless efforts, you got bail";
 
     await wait(1500);
     nextPhaseBtn.textContent = "Continue";
@@ -937,11 +936,11 @@
     let customMessage = "";
     if (lastKilledPhoto) {
       if (lastKilledPhoto.includes('anu.webp')) {
-        customMessage = "<br>You have harmed Bhaujai.";
+        customMessage = "<br>You have harmed Saurabh.";
       } else if (lastKilledPhoto.includes('salu.webp')) {
         customMessage = "<br>You have harmed Shalu Bhalu.";
       } else if (lastKilledPhoto.includes('py.webp')) {
-        customMessage = "<br>You have harmed Priyanka.";
+        customMessage = "<br>You have harmed Priyanka Chopra.";
       }
     }
 
