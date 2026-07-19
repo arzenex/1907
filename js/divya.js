@@ -1,4 +1,4 @@
-;let state = "WAIT";
+let state = "WAIT";
 let progress = 0;
 let finalStage = false;
 let fallbackTapEnabled = false;
