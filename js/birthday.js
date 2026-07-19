@@ -1,6 +1,7 @@
 let state = "WAIT";
 let progress = 0;
 let finalStage = false;
+let fallbackTapEnabled = false;
 const target = 300;
 let lastX,lastY,lastZ;
 const music = document.getElementById('bg-music');
@@ -65,10 +66,13 @@ function startApp(){
     roomLighting.style.transition = 'background 1s ease';
     document.getElementById('main-container').insertBefore(roomLighting, document.getElementById('cake-group'));
 
-    // 2. Fallback: Allow clicking/tapping the screen to simulate shaking (for Desktop / unsupported devices)
+    // 2. Fallback: Allow clicking/tapping the screen to simulate shaking
+    //    - Desktop: works immediately (no shake sensor available)
+    //    - Mobile: blocked at first (must physically shake), but auto-unlocks
+    //      after 60s of no progress via the WAIT/LIT timeouts below
     window.addEventListener('click', (e) => {
-        // Only allow click-to-shake on Desktop. Mobile users must physically shake!
-        if (/Mobi|Android|iPhone|iPad/i.test(navigator.userAgent)) return;
+        const isMobile = /Mobi|Android|iPhone|iPad/i.test(navigator.userAgent);
+        if (isMobile && !fallbackTapEnabled) return;
 
         // Ignore if clicking the start button, mystery boxes, or if we are cutting the cake
         if(e.target.closest('button') || state === "FIND_KNIFE" || state === "SWIPE_CUT" || state === "END") return;
@@ -84,6 +88,15 @@ function startApp(){
             handleMotion({ accelerationIncludingGravity: { x: 70, y: 0, z: 0 } });
         }
     });
+
+    // 3. Fallback timer: if candles are never lit within 60s, unlock tap-to-shake
+    setTimeout(() => {
+        if (state === "WAIT") {
+            fallbackTapEnabled = true;
+            const hintEl = document.getElementById('hint-text');
+            if (hintEl) hintEl.innerText = "Tap the screen to light the candles!";
+        }
+    }, 60000);
 }
 
 function handleMotion(e){
@@ -112,6 +125,15 @@ function handleMotion(e){
                 gsap.fromTo(hintEl, { scale: 1.2, color: "#ffeb3b" }, { scale: 1, color: "", duration: 0.4, yoyo: true, repeat: 5 });
             }
         }, 10000);
+
+        // 60-second fallback: unlock tap-to-shake if still stuck blowing out candles
+        setTimeout(() => {
+            if (state === "LIT" && progress < target) {
+                fallbackTapEnabled = true;
+                const hintEl = document.getElementById('hint-text');
+                if (hintEl) hintEl.innerText = "Tap the screen to blow them out!";
+            }
+        }, 60000);
 
         // Continuous decay loop so the bar drops if they stop moving/clicking
         let decayInt = setInterval(() => {
